@@ -6,8 +6,8 @@ export const PORT = process.env.PORT;
 export const JWT_SECRET = process.env.JWT_SECRET;
 
 export const DB_CONFIG = {
-    host: process.env.HOST,
-    port:process.env.DB_PPORT,
+    host: process.env.DB_HOST,
+    port:process.env.DB_PORT,
     user:process.env.DB_USER,
     password:process.env.DB_PASSWORD,
     database: prpcess.env.DB_NAME
