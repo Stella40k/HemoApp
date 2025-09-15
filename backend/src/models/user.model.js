@@ -1,5 +1,4 @@
-import { DataTypes } from "sequelize";
-import Sequelize, { sequelize } from "../configs/config.db.js";
+import mongoose from "mongoose";
 
 export const UserModel = sequelize.define('User', {
     id:{
