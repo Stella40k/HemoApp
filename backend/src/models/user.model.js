@@ -1,49 +1,60 @@
 import mongoose from "mongoose";
 
-export const UserModel = sequelize.define('User', {
-    id:{
-        type: DataTypes.INTEGER,
-            primaryKey: true,
-    autoIncrement: true
-    },
-    email:{
-        type: DataTypes.STRING,
-        allowNull: false,
+export const userShcema = new mongoose.Schema({
+     email:{
+        type: String,
         unique: true,
-        validate:{
-            isEmail:true
-        }
+        require: true,
+        lowercase: true,
+        match:[/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, "Email inválido"]
     },
     passwordHash:{
-        type: DataTypes.STRING,
-        allowNull: false
+        type: String,
+        require: true
     },
     emailVerified:{
-        type: DataTypes.BOOLEAN,
-        defaultValue: false
+        type: Boolean,
+        default: false
     },
     bloodType:{
-        type: DataTypes.ENUM('A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'),
-        allowNull: true
+        type: String,
+        enum:  ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-", null],
+        default: null
     },
     location:{
-        type: DataTypes.STRING,
-        allowNull: true
+        type: String,
+        enum:["Point"],
+        require: true,
+        default: "Point"
+    },
+    coordinates:{
+        type:[Number],
+        require: true,
+        index: '2dsphere'
     },
     notificationPreference:{
-        type: DataTypes.JSON,
-        defaultValue:{ urgentAlert: true, reminder: true }
+        type: Map,
+        of: Boolean,
+        default: {urgentAlert: true, reminder: true}
     },
     //para el estado de actividad
     status:{
-        type: DataTypes.ENUM('Donando', 'Descansando'),
-        defaultValue: 'Descansando'
+        type: String,
+        enum:["Donando", "Descansando"],
+        default: 'Descansando'
     },
     inactivetyReason:{
-        type: DataTypes.STRING,
-        allowNull: true //ver como hacer para saber la razon, si poner q se elija o q escriban
+        type: String,
+        default: null
     }
 },{
-    tableName: 'users',
     timestamps: true
-});
+});   
+
+//para ocultar la password en las respuestas
+userShcema.method.toJSON = function(){
+    const user=this.toObject();
+    delete user.passwordHash;
+    return user;
+};
+ export const User = mongoose.model("User", userShcema);
