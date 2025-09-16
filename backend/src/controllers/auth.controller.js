@@ -12,7 +12,7 @@ export const register = async(req, res)=>{
         }
 
         //crear un nuevo usuario con ubicacuon
-        const user = await User.create({
+        const userData = await User.create({
             email,
             passwordHash: password,
             location:{
@@ -21,16 +21,24 @@ export const register = async(req, res)=>{
             }
         });
 
+        if(role === 'institution'){
+            userData.role = 'institution';
+            userData.institutionName = req.body.institutionName;
+            userData.cuit = req.body.cuit;
+            userData.isInstitution = true;
+        }
+        const user = await User.create(userData);
+        
         //generacion de JWT
-        const token = generateToken(user._id);
+        const token = generateToken(User._id);
         res.status(201).json({
             ok: true,
             msg: "Usuario registrado",
             token,
             user:{
-                id: user._id,
-                email: user.email,
-                coordinates: user.location.coordinates
+                id: userData._id,
+                email: userData.email,
+                coordinates: userData.location.coordinates
             }
         });
     } catch (error) {

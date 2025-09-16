@@ -21,8 +21,8 @@ export const getUsers = async(req, res)=>{
             data: error
         });
     }
-};
-export const User = async(req, res)=>{
+}; //modificar en donde se exporte User -> UserByID
+export const UserByID = async(req, res)=>{
     try {
         const user = await User.FindById(req.params.id);
         if(!user){

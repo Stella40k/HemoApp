@@ -51,14 +51,14 @@ export const userSchema = new mongoose.Schema({
 });   
 
 //para ocultar la password en las respuestas
-userShcema.methods.toJSON = function(){
+userSchema.methods.toJSON = function(){
     const user = this.toObject();
     delete user.passwordHash;
     return user;
 };
 
 //hasheamos la pass
-userShcema.pre("save", async function(next) {
+userSchema.pre("save", async function(next) {
     if(!this.isModified("passwordHash"))return next();
 
     try{
@@ -71,8 +71,8 @@ userShcema.pre("save", async function(next) {
 });
 
 //verificacion de pass
-userShcema.methods.matchPassword = async function(password) {
+userSchema.methods.matchPassword = async function(password) {
     return await bcrypt.compare(password, this.passwordHash);
 };
 
- export const User = mongoose.model("User", userShcema);
+ export const User = mongoose.model("User", userSchema);
