@@ -62,10 +62,15 @@ userShcema.methods.toJSON = function(){
 //hasheamos la pass
 userShcema.pre("save", async function(next) {
     if(!this.isModified("passwordHash"))return next();
-    const salt = await bcrypt.genSalt(7);
-    this.passwordHash = await bcrypt.hash(this.passwordHash, salt);
-    next();
-})
+
+    try{
+        const salt = await bcrypt.genSalt(7);
+        this.passwordHash = await bcrypt.hash(this.passwordHash, salt);
+        next();
+    }catch(error){
+        next(error);
+    }
+});
 
 //verificacion de pass
 userShcema.methods.matchPassword = async function(password) {
