@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 
-export const userShcema = new mongoose.Schema({
+export const userSchema = new mongoose.Schema({
      email:{
         type: String,
         unique: true,
@@ -34,10 +34,8 @@ export const userShcema = new mongoose.Schema({
         index: '2dsphere'
     },
     notificationPreference:{
-        type: Map,
-        of: Boolean,
-        default: {urgentAlert: true, reminder: true}
-    },
+        urgentAlert: { type: Boolean, default: true },
+        reminder: { type: Boolean, default: true }    },
     //para el estado de actividad
     status:{
         type: String,
@@ -54,7 +52,7 @@ export const userShcema = new mongoose.Schema({
 
 //para ocultar la password en las respuestas
 userShcema.methods.toJSON = function(){
-    const user= this.toObject();
+    const user = this.toObject();
     delete user.passwordHash;
     return user;
 };

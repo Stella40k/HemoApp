@@ -1,5 +1,5 @@
-import { InvalidConnectionError } from "sequelize";
 import { User } from "../models/user.model.js";
+import { generateToken } from "../utils/generateToken.js"
 
 export const getUsers = async(req, res)=>{
     try {

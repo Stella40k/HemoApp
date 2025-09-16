@@ -36,8 +36,7 @@ export const register = async(req, res)=>{
     } catch (error) {
         res.status(500).json({
             ok: false,
-            msg: "Ups! Error interno del servidor",
-            data: error
+            error: "Ups! Error interno del servidor",
         })
     }
 };
@@ -50,8 +49,7 @@ export const login = async(req, res)=>{
         if(!user || !(await user.matchPassword(password))){
             return res.status(401).json({
                 ok: false,
-                msg: "Credenciales incorrectas",
-                data: error
+                error: "Credenciales incorrectas",
             });
         }
 
@@ -72,8 +70,8 @@ export const login = async(req, res)=>{
     } catch (error) {
         res.status(500).json({
             ok: false,
-            msg: "Ups! Ocurrio un error",
-            data: error
+            msg: "Ups! Ocurrio un error en el servidor",
+            error: error.message
         });
     }
 };
