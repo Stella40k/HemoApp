@@ -1,16 +1,17 @@
 import mongoose from "mongoose";
+import bcrypt from "bcrypt";
 
 export const userShcema = new mongoose.Schema({
      email:{
         type: String,
         unique: true,
-        require: true,
+        required: true,
         lowercase: true,
         match:[/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, "Email inválido"]
     },
     passwordHash:{
         type: String,
-        require: true
+        required: true
     },
     emailVerified:{
         type: Boolean,
@@ -24,12 +25,12 @@ export const userShcema = new mongoose.Schema({
     location:{
         type: String,
         enum:["Point"],
-        require: true,
+        required: true,
         default: "Point"
     },
     coordinates:{
         type:[Number],
-        require: true,
+        required: true,
         index: '2dsphere'
     },
     notificationPreference:{
@@ -52,9 +53,23 @@ export const userShcema = new mongoose.Schema({
 });   
 
 //para ocultar la password en las respuestas
-userShcema.method.toJSON = function(){
-    const user=this.toObject();
+userShcema.methods.toJSON = function(){
+    const user= this.toObject();
     delete user.passwordHash;
     return user;
 };
+
+//hasheamos la pass
+userShcema.pre("save", async function(next) {
+    if(!this.isModified("passwordHash"))return next();
+    const salt = await bcrypt.genSalt(7);
+    this.passwordHash = await bcrypt.hash(this.passwordHash, salt);
+    next();
+})
+
+//verificacion de pass
+userShcema.methods.matchPassword = async function(password) {
+    return await bcrypt.compare(password, this.password);
+};
+
  export const User = mongoose.model("User", userShcema);
