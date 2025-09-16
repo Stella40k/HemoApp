@@ -74,7 +74,7 @@ userShcema.pre("save", async function(next) {
 
 //verificacion de pass
 userShcema.methods.matchPassword = async function(password) {
-    return await bcrypt.compare(password, this.password);
+    return await bcrypt.compare(password, this.passwordHash);
 };
 
  export const User = mongoose.model("User", userShcema);
