@@ -8,7 +8,10 @@ export const register = async(req, res)=>{
         //validar si ya existe el usuario
         const userExists = await User.findOne({email});
         if(userExists){
-            return res.status(400).json({error: "El usuario ya existe"})
+            return res.status(400).json({
+                ok: false,
+                error: "El usuario ya existe"
+            });
         }
 
         //crear un nuevo usuario con ubicacuon
@@ -21,16 +24,21 @@ export const register = async(req, res)=>{
             }
         });
 
+        //validacion por si es institucion
         if(role === 'institution'){
             userData.role = 'institution';
-            userData.institutionName = req.body.institutionName;
-            userData.cuit = req.body.cuit;
+            userData.institutionName = institutionName;
+            userData.cuit = uit;
             userData.isInstitution = true;
+        }else{
+            userData.role = 'donor';
         }
+
         const user = await User.create(userData);
         
         //generacion de JWT
         const token = generateToken(User._id);
+        
         res.status(201).json({
             ok: true,
             msg: "Usuario registrado",
@@ -38,14 +46,34 @@ export const register = async(req, res)=>{
             user:{
                 id: userData._id,
                 email: userData.email,
-                coordinates: userData.location.coordinates
+                role: user.role,
+                coordinates: userData.location.coordinates,
+                ... (user.role === 'institution' && {
+                    institutionName: user.institutionName,
+                    cuit: user.cuit
+                })
             }
         });
     } catch (error) {
+        if(error.name === 'ValidationError'){
+            const errors = Object.values(error.errors).map(err=> err.message);
+            return res.status(400).json({
+                ok: false,
+                msg: "Error de validaiones",
+                details: errors
+            });
+        }
+        if(error.code === 11000){
+            return res.status(400).json({
+                ok: false,
+                error: "Email ya registrado"
+            });
+        }
         res.status(500).json({
             ok: false,
-            error: "Ups! Error interno del servidor",
-        })
+            msg: "Ups! Error interno del servidor",
+            details: process.env.NODE_ENV === 'development'? error.message: "Contacte al administrador"
+        });
     }
 };
 export const login = async(req, res)=>{
@@ -70,16 +98,21 @@ export const login = async(req, res)=>{
             user:{
                 id: user._id,
                 email: user.email,
+                role: user.role,
                 bloodType: user.bloodType,
                 coordinates: user.location.coordinates,
-                status: user.status
+                status: user.status,
+                ... (user.role === 'institution' &&{
+                    institutionName: user.institutionName,
+                    cuit: user.cuit
+                })
             }
         });
     } catch (error) {
         res.status(500).json({
             ok: false,
-            msg: "Ups! Ocurrio un error en el servidor",
-            error: error.message
+            error: "Ups! Ocurrio un error en el servidor",
+            details: process.env.NODE_ENV === 'development' ? error.message : 'Contacte al administrador'
         });
     }
 };
