@@ -3,6 +3,15 @@ import { userModel } from "../models/user.model,js";
 export const register = async(req, res)=>{
     try {
         const{userName, email, password, role, status, profileData} = req.body;
+        const existUser = await userModel.findOne({
+            $or: [{email}, {userName}]
+        });
+        if(existUser){
+            return res.status(400).json({
+                ok: false,
+                msg: "Usuario o email ya existente"
+            });
+        }
         const newUser = new userModel({
             userName, 
             email,
@@ -28,7 +37,7 @@ export const register = async(req, res)=>{
         //console.log(error)
         res.status(500).json({
             ok: false,
-            msg: "Ups! Ocurrio un error al crear registrarte"
+            msg: "Ups! Ocurrio un error al registrar el usuario"
         })
     }
 }
@@ -68,3 +77,11 @@ export const login = async(req, res)=>{
         });
     }
 };
+
+export const logout = async(req, res)=>{
+    try {
+        
+    } catch (error) {
+        
+    }
+}
