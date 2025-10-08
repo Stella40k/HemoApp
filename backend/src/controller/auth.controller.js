@@ -1,4 +1,6 @@
 import { userModel } from "../models/user.model,js";
+import { generateToken } from "../helpers/jwt.helper.js";
+import { hashedPassword, comparePasswords, hashedPassword } from "../helpers/bcrypt.helper.js";
 //Falta el token y el hasheo!!!
 export const register = async(req, res)=>{
     try {
@@ -12,6 +14,8 @@ export const register = async(req, res)=>{
                 msg: "Usuario o email ya existente"
             });
         }
+        const hashedPassword = await hashedPassword(password);
+        const emailVeri
         const newUser = new userModel({
             userName, 
             email,
