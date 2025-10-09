@@ -1,6 +1,9 @@
-import { userModel } from "../models/user.model,js";
+import { userModel } from "../models/user.model.js";
 import { generateToken, verifyToken, generateTokenRefresh } from "../helpers/jwt.helper.js";
 import { hashedPassword ,comparePasswords } from "../helpers/bcrypt.helper.js";
+import { generateSecureToken } from "../helpers/crypto.helper.js";
+//MODIFICAR LA VERIFICACION DE LA CUENTA!!!
+
 export const register = async(req, res)=>{
     try {
         const{userName, email, password, role, status, profileData} = req.body;
@@ -13,16 +16,17 @@ export const register = async(req, res)=>{
                 msg: "Usuario o email ya existente"
             });
         }
-        const hashedPassword = await hashedPassword(password);
-        const emailVerificationToken = gene
+        const passwordHash = await hashedPassword(password);
+        const emailVerificationToken = generateSecureToken();
         const newUser = new userModel({
             userName, 
             email,
-            password,//: hashedPassword,
+            password: passwordHash,
             role: role || 'community_member',
             status: status || 'inactive',
+            emailVerificationToken,
             profile:{
-                firtsName: profileData.firtsName,
+                firstName: profileData.firstName,
                 lastName: profileData.lastName,
                 birthDate: profileData.birthDate,
                 gender: profileData.gender,
@@ -31,10 +35,18 @@ export const register = async(req, res)=>{
             }
         });
         await newUser.save();
+
+        //nueva parte para la verificacion del mail
         return res.status(201).json({
             ok: true,
-            msg: "Bienvenido! ",
-            data: newUser
+            msg: "Registro exitoso! Por favor, confirmar email ",
+            data: {
+                id: newUser._id,
+                userName: newUser.userName,
+                email: newUser.email,
+                role: newUser.role,
+                status: newUser.status
+            }
         });
     } catch (error) {
         //console.log(error)
@@ -45,6 +57,52 @@ export const register = async(req, res)=>{
     }
 }
 
+export const login = async(req, res)=>{
+    try {
+        const{userName, email, password} = req.body;
+        const user = await userModel.findOne({
+            $or: [{userName}, {email}]
+        });
+        if(!user){
+            return res.status(401).json({
+                ok: false,
+                msg: "Credenciales invalidas"
+            });
+        }
+        if(user.status !== 'active'){
+            return res.status(401).json({
+                ok: false,
+                msg: "Cuenta inactiva, por favor verificar el email"
+            });
+        }
+        const accessToken = generateToken(user);
+        const refreshToken = generateTokenRefresh(user)
+
+        //para guardar la token refrescada en la bd
+        user.refreshToken = refreshToken
+        await user.save()
+
+        return res.status(200).json({
+            ok: true,
+            msg: "Logueado correctamente, bienvenido!",
+            data: {
+                accessToken,
+                refreshToken,
+                user: {
+                    id,
+                    email,
+                    role
+                }
+            }
+        });
+    } catch (error) {
+        //console.log(error);
+        res.status(500).json({
+            ok: false,
+            msg: "Error interno en el servidor"
+        });
+    }
+};
 export const getMyProfile = async(req, res)=>{
     try {
         const userId = req.user._id //viene la info del token
@@ -61,30 +119,84 @@ export const getMyProfile = async(req, res)=>{
         })
     }
 };
-
-export const login = async(req, res)=>{
+export const logout = async(req, res)=>{
     try {
-        const{userName, email, password} = req.body;
-        const user = await userModel.findOne({
-            userName
+        const userId = req.user._id;
+        await userModel.findByIdAndUpdate(userId, {
+            refreshToken: null
         });
         return res.status(200).json({
             ok: true,
-            msg: "Logueado correctamente, bienvenido!"
-        });
+            msg: "Sesion cerrada"
+        })
     } catch (error) {
-        //console.log(error);
-        res.status(500).json({
+        console.log("Error al cerrar la sesion", error);
+        return res.status(500).json({
             ok: false,
-            msg: "Error interno en el servidor"
+            msg: "Ups! Error al querer cerrar sesion"
         });
     }
 };
-
-export const logout = async(req, res)=>{
+export const refreshToken = async(req, res)=>{
     try {
-        
+        const user = req.user;
+        const newAccesToken = generateToken(user);
+        const newRefreshToken = generateTokenRefresh(user);
+
+        //actualizar el refhesh
+        user.refreshToken = newRefreshToken;
+        await user.save()
+
+        return res.status(200).json({
+            ok:true,
+            msg: "Token actualizado correctamente",
+            data: {
+                accessToken: newAccesToken,
+                refreshToken: newRefreshToken
+            }
+        });
     } catch (error) {
-        
+        console.log("eeror al refrescar la token", error);
+        return res.status(500).json({
+            ok: false,
+            msg: "Error interno del servidor: fallo en refresh Token"
+        });
     }
+};
+export const verifyEmail = async(req, res)=>{
+    try {
+        const {token} = req.params;
+        const user = await userModel.findOne({
+            emailVerificationToken: token, 
+            //emailVerificationExpires: { $gt: Date.now() }
+        });
+        if(!user){
+            return res.status(400).json({
+                ok: false,
+                msg: "Token de verificacion invalido o expirado"
+            });
+        }
+        //PARA ACTIVAR LA CUENTA (NO DISPONIBILIDAD DE DONACION)
+        user.accountStatus = 'verified';
+        user.emailVerified = true;
+        user.emailVerificationToken = null;
+        // user.emailVerificationExpires = null;
+
+        await user.save();
+        return res.status(200).json({
+            ok: true,
+            msg: "Email verificado",
+            data: {
+                id,
+                userName,
+                accountStatus
+            }
+        });
+    } catch (error) {
+        console.log("error en la verificacion del mail", error);
+        return res.status(500).json({
+            ok: false,
+            msg: "Error interno del servir, fallo la verificacion del mail"
+        })
+    };
 }

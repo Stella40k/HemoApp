@@ -35,7 +35,7 @@ const userSchema = new Schema({
         default: "inactive"
     },
     profile:{
-        firtsName:{
+        firstName:{
             type: String,
             minlength: 3,
             maxlength: 50,
