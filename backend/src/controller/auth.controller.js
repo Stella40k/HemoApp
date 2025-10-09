@@ -1,7 +1,6 @@
 import { userModel } from "../models/user.model,js";
-import { generateToken } from "../helpers/jwt.helper.js";
-import { hashedPassword, comparePasswords, hashedPassword } from "../helpers/bcrypt.helper.js";
-//Falta el token y el hasheo!!!
+import { generateToken, verifyToken, generateTokenRefresh } from "../helpers/jwt.helper.js";
+import { hashedPassword ,comparePasswords } from "../helpers/bcrypt.helper.js";
 export const register = async(req, res)=>{
     try {
         const{userName, email, password, role, status, profileData} = req.body;
@@ -15,7 +14,7 @@ export const register = async(req, res)=>{
             });
         }
         const hashedPassword = await hashedPassword(password);
-        const emailVeri
+        const emailVerificationToken = gene
         const newUser = new userModel({
             userName, 
             email,
