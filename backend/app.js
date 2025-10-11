@@ -1,26 +1,16 @@
 import express from 'express';
 import cors from 'cors';
-import mongoose from 'mongoose';
-import dotenv from 'dotenv'
-
-dotenv.config();
+import { envs } from './src/config/config.env.js';
+import { connectDB } from './src/config/config.db.js';
 
 const app = express();
 
 app.use(express.json());
 app.use(cors());
 
-const PORT = process.env.PORT;
-const MONGODB_URI = process.env.MONGODB_URI;
+const PORT = envs.PORT
 
-
-mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-    .then(() => {
-        console.log('Conectado a MongoDB');
-        app.listen(PORT, () => {
-            console.log(`Servidor corriendo en el puerto ${PORT}`);
-        });
-    })
-    .catch((error) => {
-        console.error('Error al conectar a MongoDB:', error);
-    });
+app.listen(PORT, () => {
+    connectDB();
+    console.log(`Servidor corriendo en el puerto ${PORT}`);
+});
