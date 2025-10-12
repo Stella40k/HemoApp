@@ -6,7 +6,7 @@ import { generateSecureToken } from "../helpers/crypto.helper.js";
 
 export const register = async(req, res)=>{
     try {
-        const{userName, email, password, role, status, profileData} = req.body;
+        const{userName, email, password, role, profileData} = req.body;
         const existUser = await userModel.findOne({
             $or: [{email}, {userName}]
         });
@@ -23,15 +23,18 @@ export const register = async(req, res)=>{
             email,
             password: passwordHash,
             role: role || 'community_member',
-            status: status || 'inactive',
+            accountStatus: 'unverified', //estado de cuenta
+            donationStatus: 'inactive',
             emailVerificationToken,
+            emailVerificationExpires: Date.now() + 24 * 60 * 60 * 1000,
             profile:{
                 firstName: profileData.firstName,
                 lastName: profileData.lastName,
                 birthDate: profileData.birthDate,
                 gender: profileData.gender,
                 bloodType: profileData.bloodType || null,
-                factor: profileData.factor || null
+                factor: profileData.factor || null,
+                dni: profileData.dni
             }
         });
         await newUser.save();
@@ -45,14 +48,22 @@ export const register = async(req, res)=>{
                 userName: newUser.userName,
                 email: newUser.email,
                 role: newUser.role,
-                status: newUser.status
+                accountStatus: newUser.accountStatus,
+                verificationToken: emailVerificationToken,
+                profile:{
+                    firstName: newUser.profile.firstName,
+                    lastName: newUser.profile.lastName,
+                    dni: newUser.profile.dni,
+                    birthDate: newUser.profile.birthDate
+                }
             }
         });
     } catch (error) {
-        //console.log(error)
+        console.log(error)
         res.status(500).json({
             ok: false,
-            msg: "Ups! Ocurrio un error al registrar el usuario"
+            msg: "Ups! Ocurrio un error al registrar el usuario",
+            error: error.message
         })
     }
 }
@@ -62,17 +73,24 @@ export const login = async(req, res)=>{
         const{userName, email, password} = req.body;
         const user = await userModel.findOne({
             $or: [{userName}, {email}]
-        });
+        }).select('+password');
         if(!user){
             return res.status(401).json({
                 ok: false,
                 msg: "Credenciales invalidas"
             });
         }
-        if(user.status !== 'active'){
+        const isPasswordValid = await comparePasswords(password, user.password);
+        if(!isPasswordValid){
             return res.status(401).json({
                 ok: false,
-                msg: "Cuenta inactiva, por favor verificar el email"
+                msg: "credenciales incorrectas"
+            });
+        }
+        if(user.accountStatus !== 'verified'){
+            return res.status(401).json({
+                ok: false,
+                msg: "Cuenta no verificada. Por favor verificar email"
             });
         }
         const accessToken = generateToken(user);
@@ -89,9 +107,11 @@ export const login = async(req, res)=>{
                 accessToken,
                 refreshToken,
                 user: {
-                    id,
-                    email,
-                    role
+                    id: user._id,
+                    email: user.email,
+                    role: user.role,
+                    accountStatus: user.accountStatus,
+                    donationStatus: user.donationStatus
                 }
             }
         });
@@ -112,10 +132,11 @@ export const getMyProfile = async(req, res)=>{
             data: myProfile
         })
     } catch (error) {
-        //console.log(error);
+        console.log(error);
         return res.status(500).json({
             ok: false,
-            msg: "Ups! ocurrio un error"
+            msg: "Ups! ocurrio un error",
+            error: error.message
         })
     }
 };
@@ -168,7 +189,7 @@ export const verifyEmail = async(req, res)=>{
         const {token} = req.params;
         const user = await userModel.findOne({
             emailVerificationToken: token, 
-            //emailVerificationExpires: { $gt: Date.now() }
+            emailVerificationExpires: { $gt: Date.now() }
         });
         if(!user){
             return res.status(400).json({
@@ -178,18 +199,19 @@ export const verifyEmail = async(req, res)=>{
         }
         //PARA ACTIVAR LA CUENTA (NO DISPONIBILIDAD DE DONACION)
         user.accountStatus = 'verified';
+        user.donationStatus = 'active';
         user.emailVerified = true;
         user.emailVerificationToken = null;
-        // user.emailVerificationExpires = null;
+        user.emailVerificationExpires = null;
 
         await user.save();
         return res.status(200).json({
             ok: true,
-            msg: "Email verificado",
+            msg: "Email verificado con exitos, ya puede iniicar sesion y donar",
             data: {
-                id,
-                userName,
-                accountStatus
+                id: user._id,
+                userName: user.userName,
+                accountStatus: user.accountStatus
             }
         });
     } catch (error) {
@@ -199,4 +221,4 @@ export const verifyEmail = async(req, res)=>{
             msg: "Error interno del servir, fallo la verificacion del mail"
         })
     };
-}
+};

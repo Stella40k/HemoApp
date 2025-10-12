@@ -14,25 +14,43 @@ const userSchema = new Schema({
         type: String,
         match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, "Email inválido"],
         required: true,
-        lowercase: true
+        lowercase: true,
+        unique: true
     },
     password:{
         type: String,
         required: true,
-        match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/],
         minlength: 6,
-        select: false
     },
     role:{
         type: String,
-        enum :["donador", "isntitucion", "moderador", "community_member"], //"community_member" usuarios no donantes
-        default: "community_member",
-        index: true
+        enum: ["donador", "institucion", "moderador", "community_member"],  //"community_member" usuarios no donantes
+        default: "community_member"
     },
-    status:{
+    accountStatus:{//campo para la verificacion de la cuenta
+        type: String,
+        enum: ["verified", "unverified", "suspended"],
+        default: "unverified"
+    },
+    donationStatus:{ 
         type: String,
         enum:["active", "inactive"],
-        default: "inactive"
+        default: "inactive" 
+    },
+    //para la autenticacion de los tokens
+    refreshToken: {
+        type: String,
+        select: false
+    },
+    emailVerificationToken:{
+        type: String
+    },
+    emailVerificationExpires:{
+        type: Date
+    },
+    emailVerified: {
+        type: Boolean,
+        default: false
     },
     profile:{
         firstName:{

@@ -10,7 +10,7 @@ export const generateToken =(user)=>{
             },
             process.env.JWT_SECRET,
             {
-                expiresIn: "1h"
+                expiresIn: "7d"
             }
         );
         return token;
@@ -35,7 +35,7 @@ export const generateTokenRefresh = (user)=>{
                 id: user._id,
                 type: 'refresh'
             },
-            process.env.JWT_SECRET,
+            process.env.JWT_REFRESH_SECRET,
             {
                 expiresIn: "7d"
             }
