@@ -154,7 +154,8 @@ export const logout = async(req, res)=>{
         console.log("Error al cerrar la sesion", error);
         return res.status(500).json({
             ok: false,
-            msg: "Ups! Error al querer cerrar sesion"
+            msg: "Ups! Error al querer cerrar sesion",
+            error: error.message
         });
     }
 };

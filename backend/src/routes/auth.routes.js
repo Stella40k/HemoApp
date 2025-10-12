@@ -4,16 +4,23 @@ import {
     login,
     getMyProfile,
     logout,
-    //refheshToken,
-    verifyEmail
+    verifyEmail,
+    refreshToken
 } from "../controller/auth.controller.js";
-//faltan los middlewares
+import {
+    authenticateToken,
+    validateRefreshToken
+} from "../middlewares/auth.middleware.js";
 
 const authRouter = express.Router();
+//rutas publicas
 authRouter.post("/auth/register", register);
 authRouter.post("/auth/login", login);
-authRouter.post("/auth/logout", logout);
-authRouter.get("/auth/me", getMyProfile)
 authRouter.get("/auth/verify-email/:token", verifyEmail);
+
+//rutas protegidas
+authRouter.get("/auth/me", authenticateToken, getMyProfile)
+authRouter.post("/auth/logout", authenticateToken, logout);
+authRouter.post("/auth/refresh-token", validateRefreshToken, refreshToken)
 
 export default authRouter;
