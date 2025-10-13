@@ -40,7 +40,7 @@ const userSchema = new Schema({
     //para la autenticacion de los tokens
     refreshToken: {
         type: String,
-        select: false
+        // select: false
     },
     emailVerificationToken:{
         type: String

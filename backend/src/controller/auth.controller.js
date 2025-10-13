@@ -126,7 +126,7 @@ export const login = async(req, res)=>{
 export const getMyProfile = async(req, res)=>{
     try {
         const userId = req.user._id //viene la info del token
-        const myProfile = await userModel.findById(userId).select("-password");
+        const myProfile = await userModel.findById(userId).select("-password -refreshToken");
         res.status(200).json({
             ok: true,
             data: myProfile
@@ -145,6 +145,7 @@ export const logout = async(req, res)=>{
         const userId = req.user._id;
         await userModel.findByIdAndUpdate(userId, {
             refreshToken: null
+            //$unset: {refreshToken: 1} elimina todo el campo, activar cuando deje de probar
         });
         return res.status(200).json({
             ok: true,

@@ -47,13 +47,13 @@ export const validateRefreshToken = async(req, res, next)=>{
         }
         const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
         const user = await userModel.findById(decoded.id);
+
         if(!user || user.refreshToken !== refreshToken){
             return res.status(401).json({
                 ok: false,
                 msg: "Refresh del token invalido"
             });
         }
-        console.log(refreshToken)
         req.user = user;
         next();
     } catch (error) {
