@@ -91,8 +91,80 @@ const userSchema = new Schema({
             default: null
         }
     },
-
     //faltan las cosas para la ubicacion creo
+    medicalProfile:{
+        weight:{
+            type: Number,
+            min: 30,
+            max: 300,
+            default: null
+        },
+        height:{
+            type: Number,
+            min: 100, ///en cm
+            max: 220,
+            default: null
+        },
+        //historial de donacioness
+        lastDonationDate:{
+            type: Date,
+            default: null
+        },
+        totalDonations:{
+            type: Number,
+            default: 0
+        },
+        //historial medico
+        hasChronicDiseases:{ 
+            type: Boolean,
+            default: null
+        },
+        recentSurgeries:{
+            type: Boolean,
+            default: null
+        },
+        hasTraveledRecently:{
+            type: Boolean,
+            default: null
+        },
+        //para donaciones 
+        canDonate:{//esta parte es para la logica de el status de donacion
+            type: Boolean,
+            default: true
+        },
+        temporaryDeferral: {
+            type: Boolean,
+            default: false
+        },
+    },
+    //apartado para las notificciones
+    notificationPreferences:{
+        emergencyAlerts:{
+            type: Boolean,
+            default: true
+        },
+        bloodMatch:{
+            type: Boolean,
+            default: true
+        },
+        donationReminders: {//notificaciones de recordatorios despues de la donacion
+            type: Boolean,
+            default: true
+        },
+        newaUpdates:{//notificaciones o novedes x
+            type: Boolean,
+            default: true
+        }
+    },
+    //para el onboarding
+//     onboardingCompleted:{
+//         type: Boolean,
+//         default: false
+//     },
+//     onboardingStep:{
+//         type: Number,
+//         default: 0
+//     }
 },{
     versionKey: false,
     timestamps: true
