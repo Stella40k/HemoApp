@@ -78,14 +78,15 @@ export const updateDonationStatus = async(req, res)=>{
 export const desactiveAccount = async(req, res)=>{
     try {
         const userId = req.user._id;
-        await userModel.findByIdAndDelete(
+        const desactivateUser = await userModel.findByIdAndUpdate(
             userId,
             {
                 accountStatus: "suspended",
                 donationStatus: "inactive",
                 refreshToken: null //es pq cierra sesion
-            }
-        );
+            },
+            {new: true}
+        ).select("-password -refreshToken");
         res.status(200).json({
             ok: true,
             msg: "Cuenta desactivada"
