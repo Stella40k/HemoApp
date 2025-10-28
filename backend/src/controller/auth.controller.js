@@ -2,6 +2,7 @@ import { userModel } from "../models/user.model.js";
 import { generateToken, verifyToken, generateTokenRefresh } from "../helpers/jwt.helper.js";
 import { hashedPassword ,comparePasswords } from "../helpers/bcrypt.helper.js";
 import { generateSecureToken } from "../helpers/crypto.helper.js";
+import { emailService } from "../services/email.service.js";
 //MODIFICAR LA VERIFICACION DE LA CUENTA!!!
 
 export const register = async(req, res)=>{
@@ -38,7 +39,11 @@ export const register = async(req, res)=>{
             }
         });
         await newUser.save();
-
+        try {
+            await emailService.sendVerificationEmail(email, emailVerificationToken);
+        } catch (error) {
+            console.log("usuario creado pero email invalido", emalError)
+        }
         //nueva parte para la verificacion del mail
         return res.status(201).json({
             ok: true,
@@ -49,7 +54,6 @@ export const register = async(req, res)=>{
                 email: newUser.email,
                 role: newUser.role,
                 accountStatus: newUser.accountStatus,
-                verificationToken: emailVerificationToken,
                 profile:{
                     firstName: newUser.profile.firstName,
                     lastName: newUser.profile.lastName,
@@ -87,10 +91,10 @@ export const login = async(req, res)=>{
                 msg: "credenciales incorrectas"
             });
         }
-        if(user.accountStatus !== 'verified'){
+        if(!user.emailVerified || user.accountStatus !== "verified"){
             return res.status(401).json({
                 ok: false,
-                msg: "Cuenta no verificada. Por favor verificar email"
+                msg: "Cuenta no verificada. Por favor verificar el email"
             });
         }
         const accessToken = generateToken(user);
@@ -201,10 +205,9 @@ export const verifyEmail = async(req, res)=>{
         }
         //PARA ACTIVAR LA CUENTA (NO DISPONIBILIDAD DE DONACION)
         user.accountStatus = 'verified';
-        user.donationStatus = 'active';
         user.emailVerified = true;
-        user.emailVerificationToken = null;
-        user.emailVerificationExpires = null;
+        user.emailVerificationToken = undefined;
+        user.emailVerificationExpires = undefined;
 
         await user.save();
         return res.status(200).json({
