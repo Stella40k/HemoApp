@@ -29,7 +29,7 @@ const userSchema = new Schema({
     },
     accountStatus:{//campo para la verificacion de la cuenta
         type: String,
-        enum: ["verified", "unverified", "suspended"],
+        enum: ["verified", "unverified", "suspended", "pending_validation"],
         default: "unverified"
     },
     donationStatus:{ 
@@ -40,10 +40,11 @@ const userSchema = new Schema({
     //para la autenticacion de los tokens
     refreshToken: {
         type: String,
-        // select: false
+        select: false
     },
     emailVerificationToken:{
-        type: String
+        type: String,
+        select: false
     },
     emailVerificationExpires:{
         type: Date
@@ -52,17 +53,32 @@ const userSchema = new Schema({
         type: Boolean,
         default: false
     },
+    location:{
+        type:{
+            type: String,
+            enum: ['Point'],
+            default: 'Point'
+        },
+        coordinates:{
+            type: [Number],
+            index: '2dsphere'
+        }
+    },
+    locationShared:{
+        type: Boolean,
+        default: false
+    },
     profile:{
         firstName:{
             type: String,
-            minlength: 3,
+            minlength: 2,
             maxlength: 50,
             trim: true,
             required: true
         },
         lastName:{
             type: String,
-            minlength: 3,
+            minlength: 2,
             maxlength: 60,
             trim: true,
             required: true
@@ -136,6 +152,14 @@ const userSchema = new Schema({
             type: Boolean,
             default: false
         },
+        deferralReason:{//razones de pq no dona o referimiento
+            type: String,
+            default: null
+        },
+        deferralUntil:{
+            type: Date,
+            default: null
+        }
     },
     //apartado para las notificciones
     notificationPreferences:{
@@ -151,7 +175,11 @@ const userSchema = new Schema({
             type: Boolean,
             default: true
         },
-        newaUpdates:{//notificaciones o novedes x
+        newsUpdates:{//notificaciones o novedes x
+            type: Boolean,
+            default: true
+        },
+        locationBasedAlerts:{ //por si hay campañas de donaciones
             type: Boolean,
             default: true
         }
@@ -164,10 +192,33 @@ const userSchema = new Schema({
 //     onboardingStep:{
 //         type: Number,
 //         default: 0
-//     }
+//     }}
+    lastLogin: { //campos para auditoria
+        type: Date,
+        default: null
+    },
+    loginCount: {
+        type: Number,
+        default: 0
+    }
 },{
     versionKey: false,
     timestamps: true
 });
+//VER TODO ESTO 
+// userSchema.index({ "location.coordinates": "2dsphere" });
+// userSchema.index({ "profile.bloodType": 1 });
+// userSchema.index({ "medicalProfile.canDonate": 1 });
+// userSchema.index({ role: 1, accountStatus: 1 });
 
+// userSchema.methods.canDonateBlood = function() {
+//     return this.medicalProfile.canDonate && 
+//            this.donationStatus === 'active' &&
+//            this.accountStatus === 'verified' &&
+//            (!this.medicalProfile.deferralUntil || this.medicalProfile.deferralUntil > new Date());
+// };
+
+// userSchema.methods.getAge = function() {
+//     return new Date().getFullYear() - this.profile.birthDate.getFullYear();
+// };
 export const userModel = mongoose.model("User", userSchema);
