@@ -1,70 +1,43 @@
 import { userModel } from "../models/user.model.js";
 import { generateToken, verifyToken, generateTokenRefresh } from "../helpers/jwt.helper.js";
-import { hashedPassword ,comparePasswords } from "../helpers/bcrypt.helper.js";
-import { generateSecureToken } from "../helpers/crypto.helper.js";
-import { emailService } from "../services/email.service.js";
+import {comparePasswords } from "../helpers/bcrypt.helper.js";
+import { RegistrationService } from "../services/registration.service.js";
+
 //MODIFICAR LA VERIFICACION DE LA CUENTA!!!
 
 export const register = async(req, res)=>{
     try {
-        const{userName, email, password, role, profileData} = req.body;
-        const existUser = await userModel.findOne({
-            $or: [{email}, {userName}]
+        const{userName, email, password, role, profileData, institutionData} = req.body;
+        const result = await RegistrationService.registerUser({
+            userName, email, passsword, role, profileData, institutionData
         });
-        if(existUser){
-            return res.status(400).json({
-                ok: false,
-                msg: "Usuario o email ya existente"
-            });
-        }
-        const passwordHash = await hashedPassword(password);
-        const emailVerificationToken = generateSecureToken();
-        const newUser = new userModel({
-            userName, 
-            email,
-            password: passwordHash,
-            role: role || 'community_member',
-            accountStatus: 'unverified', //estado de cuenta
-            donationStatus: 'inactive',
-            emailVerificationToken,
-            emailVerificationExpires: Date.now() + 24 * 60 * 60 * 1000,
-            profile:{
-                firstName: profileData.firstName,
-                lastName: profileData.lastName,
-                birthDate: profileData.birthDate,
-                gender: profileData.gender,
-                bloodType: profileData.bloodType || null,
-                factor: profileData.factor || null,
-                dni: profileData.dni
-            }
-        });
-        await newUser.save();
-        try {
-            await emailService.sendVerificationEmail(email, emailVerificationToken);
-        } catch (error) {
-            console.log("usuario creado pero email invalido", emalError)
-        }
-        //nueva parte para la verificacion del mail
+        const message = result.isInstitution
+            ?"Registro exitoso. La institucion esta en proceso de validacion."
+            : "Registro eexitoso: Por favor, verifica tu bandeja de entrada de email."
+        
         return res.status(201).json({
             ok: true,
-            msg: "Registro exitoso! Por favor, confirmar email ",
+            msg: message,
             data: {
-                id: newUser._id,
-                userName: newUser.userName,
-                email: newUser.email,
-                role: newUser.role,
-                accountStatus: newUser.accountStatus,
-                profile:{
-                    firstName: newUser.profile.firstName,
-                    lastName: newUser.profile.lastName,
-                    dni: newUser.profile.dni,
-                    birthDate: newUser.profile.birthDate
-                }
+                id: result.user._id,
+                userName: result.user.userName,
+                email: result.user.email,
+                role: result.user.role,
+                accountStatus: result.user.accountStatus,
+                ...(result.isInstitution && {
+                    institutionStatus: "pending_validation"
+                }),
+                profile: result.user.profile ? {
+                    firstName: result.user.profile.firstName,
+                    lastName: result.user.profile.lastName,
+                    dni: result.user.profile.dni,
+                    birthDate: result.user.profile.birthDate
+                } : undefined
             }
         });
     } catch (error) {
-        console.log(error)
-        res.status(500).json({
+        console.log("error en registro", error);
+        res.status(400).json({
             ok: false,
             msg: "Ups! Ocurrio un error al registrar el usuario",
             error: error.message
@@ -91,17 +64,26 @@ export const login = async(req, res)=>{
                 msg: "credenciales incorrectas"
             });
         }
+        if(!user.role === "institution"){
+            if(user.accountStatus === "pending_validation"){
+                return res.status(401).json({
+                    ok: false,
+                    msg: "La institucion esta en proceso de validacion. Te notificaremos cuando sea aprobada"
+                });
+            }
+        }
         if(!user.emailVerified || user.accountStatus !== "verified"){
             return res.status(401).json({
                 ok: false,
-                msg: "Cuenta no verificada. Por favor verificar el email"
+                msg: "Cuenta no verificada. Por favor verifica tu email"
             });
         }
         const accessToken = generateToken(user);
         const refreshToken = generateTokenRefresh(user)
-
-        //para guardar la token refrescada en la bd
-        user.refreshToken = refreshToken
+        //parte para la auditoria
+        user.lastLogin = new Date();
+        user.loginCount += 1;
+        user.refreshToken = refreshToken;//para guardar la token refrescada en la bd
         await user.save()
 
         return res.status(200).json({
@@ -115,7 +97,8 @@ export const login = async(req, res)=>{
                     email: user.email,
                     role: user.role,
                     accountStatus: user.accountStatus,
-                    donationStatus: user.donationStatus
+                    donationStatus: user.donationStatus,
+                    lastLogin: user.lastLogin
                 }
             }
         });

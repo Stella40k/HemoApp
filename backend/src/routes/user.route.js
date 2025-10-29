@@ -12,3 +12,6 @@ userRouter.patch("/user/donation-status", authenticateToken, updateDonationStatu
 userRouter.delete("/user/desactive", authenticateToken, desactiveAccount);
 
 export default userRouter;
+
+
+///al servicio deben llegar limpio los datos, se le aplican middlewares tambien
