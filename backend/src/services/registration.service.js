@@ -39,7 +39,7 @@ export class RegistrationService {
                 dni: profileData.dni
             } : undefined
         });
-        await user.save();
+        await newUser.save();
 
         if(role === 'institution' && institutionData){
                 await this.createInstitution(newUser._id. institutionData);

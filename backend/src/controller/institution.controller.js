@@ -1,7 +1,7 @@
 import { InstitutionModel } from "../models/institution.model.js";
 import { userModel } from "../models/user.model.js";
 
-export const requireInstitution = async (req, resizeBy, next)=>{
+export const requireInstitution = async (req, res, next)=>{
     try {
         if(req.user.role !== "institution"){
             return res.status(403).json({

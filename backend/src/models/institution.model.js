@@ -147,59 +147,10 @@ const institutionSchema = new mongoose.Schema({
     timestamps: true
 });
 //ver si estos metodos sirven
-// MÉTODO PARA VALIDAR CUIT (ALGORITMO ARGENTINO)
-// institutionSchema.methods.validateCUIT = function(cuit) {
-//     if (!cuit || cuit.length !== 11) return false;
-    
-//     const codes = [5, 4, 3, 2, 7, 6, 5, 4, 3, 2];
-//     let total = 0;
-    
-//     for (let i = 0; i < 10; i++) {
-//         total += parseInt(cuit[i]) * codes[i];
-//     }
-    
-//     const remainder = total % 11;
-//     const expectedDigit = remainder === 0 ? 0 : 11 - remainder;
-    
-//     return parseInt(cuit[10]) === expectedDigit;
-// };
-
-// MÉTODO PARA VERIFICAR SI ESTÁ ABIERTO
-// institutionSchema.methods.isOpenNow = function() {
-//     const now = new Date();
-//     const today = now.toLocaleString('en-US', { weekday: 'long' }).toLowerCase();
-//     const currentTime = now.toTimeString().slice(0, 5); // "HH:MM"
-    
-//     const todaySchedule = this.schedule[today];
-    
-//     if (!todaySchedule || !todaySchedule.active) return false;
-    
-//     return currentTime >= todaySchedule.open && currentTime <= todaySchedule.close;
-// };
-
-// MÉTODO PARA OBTENER HORARIOS EN FORMATO LEGIBLE
-// institutionSchema.methods.getFormattedSchedule = function() {
-//     const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-//     const formatted = {};
-    
-//     days.forEach(day => {
-//         const schedule = this.schedule[day];
-//         if (schedule && schedule.active) {
-//             formatted[day] = `${schedule.open} - ${schedule.close}`;
-//         } else {
-//             formatted[day] = 'Cerrado';
-//         }
-//     });
-    
-//     return formatted;
-// };
-
-// ÍNDICES PARA OPTIMIZAR CONSULTAS
-// institutionSchema.index({ "location.coordinates": "2dsphere" });
-// institutionSchema.index({ cuit: 1 });
-// institutionSchema.index({ validationStatus: 1 });
-// institutionSchema.index({ institutionType: 1 });
-// institutionSchema.index({ "services.donation.blood": 1 });
-// institutionSchema.index({ city: 1, province: 1 });
+institutionSchema.index({ "location.coordinates": "2dsphere" });
+institutionSchema.index({ validationStatus: 1 });
+institutionSchema.index({ institutionType: 1 });
+institutionSchema.index({ "services.donation.blood": 1 });
+institutionSchema.index({ "address.city": 1, "address.province": 1 });
 
 export const InstitutionModel = mongoose.model("Institution", institutionSchema);
