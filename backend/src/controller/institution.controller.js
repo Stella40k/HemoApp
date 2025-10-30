@@ -20,7 +20,7 @@ export const requireInstitution = async (req, res, next)=>{
 export const getMyInstitution = async(req, res)=>{
     try {
         const institution = await InstitutionModel.findOne({
-            user: req.user.id
+            user: req.user._id
         }).populate("user", "email userName");
 
         if (!institution) {

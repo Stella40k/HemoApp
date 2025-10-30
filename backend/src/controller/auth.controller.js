@@ -9,7 +9,7 @@ export const register = async(req, res)=>{
     try {
         const{userName, email, password, role, profileData, institutionData} = req.body;
         const result = await RegistrationService.registerUser({
-            userName, email, passsword, role, profileData, institutionData
+            userName, email, password, role, profileData, institutionData
         });
         const message = result.isInstitution
             ?"Registro exitoso. La institucion esta en proceso de validacion."
