@@ -57,6 +57,7 @@ export const validateInstitucion = async(req, res)=>{
         institution.validationStatus = action;
         institution.validatedBy = req.user._id;
         institution.validatedAt = new Date();
+
         if(action === "aproved"){
             institution.user.accountStatus = "verified";
         } else {
@@ -69,9 +70,52 @@ export const validateInstitucion = async(req, res)=>{
         ]);
         res.status(200).json({
             ok: true,
-            msg: `Institucion ${action === "aproved"? "aprobada" : "rechazada"}` 
-        })
+            msg: `Institucion ${action === "aproved"? "aprobada" : "rechazada"} exitosamente`,
+            data: {
+                institution:{
+                    id: institution._id,
+                    legalName: institution.legalName,
+                    validationStatus: institution.validationStatus
+                }
+            } 
+        });
     } catch (error) {
-        
+        console.log("error en validacion", error);
+        res.status(500).json({
+            ok: false,
+            msg: "Error interno de validacion"
+        });
+    }
+};
+export const getAllInstitutions = async(req, res)=>{
+    try {
+        const{role, accountStatus, page = 1, limit = 20} = req.query;
+        let query = {};
+        if(role) query.role = role;
+        if(accountStatus) query.accountStatus = accountStatus
+
+        const users = await userModel.find(query) //filtra por rol
+        .select("userName email role accountStatus donationStatus createdAt lastLogin")//elige q campos traer
+        .limit(limit * 1) //cuantos resultados mostrar
+        .skip((page - 1) * limit) //desde q resultado empezar
+        .sort({createdAt: -1}); //ordena por fecha, lo primero q muestra son los usuarios mas nuevos
+
+        const total = await userModel.countDocuments(query); //filtra la cantidad de usuarios, countDocument cuenta cuantas paginas hay 
+        res.status(200).json({
+            ok: true,
+            data: users,
+            pagination: {
+                page: parseInt(page),
+                limit: parseInt(limit),
+                total,
+                pages: Match.ceil(total/limit)
+            }
+        });
+    } catch (error) {
+        console.log("error al obtener usuarios", error);
+        res.status(500).json({
+            ok: false,
+            msg: "Error interno del servidor"
+        });
     }
 }
