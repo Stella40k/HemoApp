@@ -42,7 +42,7 @@ export class RegistrationService {
         await newUser.save();
 
         if(role === 'institution' && institutionData){
-                await this.createInstitution(newUser._id. institutionData);
+                await this.createInstitution(newUser._id, institutionData);
         }
         try {
             await emailService.sendVerificationEmail(email, emailVerificationToken);

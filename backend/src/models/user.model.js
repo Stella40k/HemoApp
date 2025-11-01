@@ -184,15 +184,6 @@ const userSchema = new Schema({
             default: true
         }
     },
-    //para el onboarding
-//     onboardingCompleted:{
-//         type: Boolean,
-//         default: false
-//     },
-//     onboardingStep:{
-//         type: Number,
-//         default: 0
-//     }}
     lastLogin: { //campos para auditoria
         type: Date,
         default: null
@@ -200,6 +191,20 @@ const userSchema = new Schema({
     loginCount: {
         type: Number,
         default: 0
+    },
+    //para el onboarding
+    onboardingCompleted: {
+        type: Boolean,
+        default: false
+    },
+    onboardingStep: {
+        type: Number,
+        default: 0
+    },
+    onboardingAnswers: {
+        type: Map,
+        of: mongoose.Schema.Types.Mixed,
+        default: {}
     }
 },{
     versionKey: false,

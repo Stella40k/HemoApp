@@ -31,7 +31,7 @@ const onboardingSchema = new Schema({
     },
     fieldName: {
         type: String,
-        default: FontFaceSetLoadEvent
+        default: ""
     },
     category:{
         type: String,
