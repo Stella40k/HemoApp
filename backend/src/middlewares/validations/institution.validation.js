@@ -42,3 +42,23 @@ export const createInstitutionValidation=[
             next();
         }
 ];
+export const loginValidation = [
+    body("email")
+        .optional()
+        .isEmail().withMessage("Ingrese email valido"),
+    body("userName")
+        .optional()
+        .isLength({min: 3}).withMessage("Usuario invalido"),
+    body("password")
+        .notEmpty().withMessage("Contraseña obligatoria"),
+
+    (req, res, next) =>{ //pongo aca para no importar mchas cosas en las rutas 
+        if(!req.body.emaiil && !req.body.userName){
+            return res.status(400).json({
+                ok: false,
+                msg: "Email o nombra de usuario es requerido"
+            });
+        }
+        next();
+    }
+];
