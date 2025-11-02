@@ -10,11 +10,13 @@ import{
     getOnboardingProgres
 } from "../controller/onboarding.controller.js"
 import {authenticateToken} from "../middlewares/auth.middleware.js"
+import { updateProfileValidation } from "../middlewares/validations/user.validation.js";
 
 const userRouter = express.Router()
-userRouter.put("/user/profile", authenticateToken, updateProfile);
+//rutas de perfil validado
+userRouter.put("/user/profile", authenticateToken, updateProfileValidation, updateProfile);
 userRouter.patch("/user/donation-status", authenticateToken, updateDonationStatus);
-userRouter.delete("/user/desactive", authenticateToken, desactiveAccount);
+userRouter.delete("/user/desactivate", authenticateToken, desactiveAccount);
 
 //rutas del onboarding
 userRouter.get("/user/onboarding/next-step", authenticateToken, getOnboardingStep);

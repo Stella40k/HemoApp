@@ -42,21 +42,20 @@ export const createInstitutionValidation=[
             next();
         }
 ];
-export const loginValidation = [
-    body("email")
+export const updateInstitutionValidation = [
+    body('legalName')
         .optional()
-        .isEmail().withMessage("Ingrese email valido"),
-    body("userName")
+        .isLength({ max: 200 }).withMessage("Máximo 200 caracteres"),
+    body('email')
         .optional()
-        .isLength({min: 3}).withMessage("Usuario invalido"),
-    body("password")
-        .notEmpty().withMessage("Contraseña obligatoria"),
-
-    (req, res, next) =>{ //pongo aca para no importar mchas cosas en las rutas 
-        if(!req.body.emaiil && !req.body.userName){
+        .isEmail().withMessage("Email inválido"),
+    (req, res, next) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
             return res.status(400).json({
                 ok: false,
-                msg: "Email o nombra de usuario es requerido"
+                msg: "Errores de validacion al actualizar institución",
+                errors: errors.array()
             });
         }
         next();

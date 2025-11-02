@@ -41,34 +41,52 @@ export const saveOnboardingAnswer = async(req, res) =>{ //gestiona el proceso de
         const {step, answer} = req.body;
         const user = await userModel.findById(req.user._id);
         const question = await onboardingQuestion.findOne({step});
-        if(!question){
+        if(!user || !question){
             return res.status(404).json({
             ok: false,
-            msg: "Pregunta no encontrada"
-            })
-        }
+            msg: !user
+             ? "Usuario no encontrado." 
+             : "Pregunta no encontrada"
+            });
+        } 
         //guardamos respuestas
         if(question.fieldName){
             const fieldPath = question.fieldName; //fieldName es donde gurda las repuestas
             await userModel.findByIdAndUpdate(
-                user._id,
-                {$set: {[fieldPath]: answer}}
-            );
+                user._id,{
+                $set: {[fieldPath]: answer}
+            });
+        } else {
+            user.onboardingAnswers.set(step.toString(), answer); //si la pregunta no tiene su fieldname guaadara un mapa general
         }
+        if (step > user.onboardingStep) {//actualiza el progreso
+            user.onboardingStep = step;
+        }
+        const totalQuestions = await onboardingQuestion.countDocuments(); //comprobamos su estanb todos los pasos
+        if(step >= totalQuestions){
+            user.onboardingCompleted = true
+        }
+
         await user.save();
+       
         res.status(200).json({
             ok: true,
             msg: "Respuestas guardadas",
             data:{
-                currentStep: step,
-                answer: answer
+                currentStep: user.onboardingStep,
+                totalSteps: totalQuestions,
+                progress:
+                    totalQuestions > 0
+                    ? Math.round((user.onboardingStep / totalQuestions) * 100)
+                    : 0,
+            completed: user.onboardingCompleted,
             }
-        })
+        });
     } catch (error) {
         console.log("error al guardar respuestas", error);
         return res.status(500).json({
             ok: false,
-            msg: "Error interno"
+            msg: "Error interno al guardar las respuestas"
         });
     }
 };

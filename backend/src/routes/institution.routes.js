@@ -1,6 +1,9 @@
 import express from "express";
 import { authenticateToken } from "../middlewares/auth.middleware.js";
-import { createInstitutionValidation } from "../middlewares/validations/institution.validation.js";
+import { 
+    createInstitutionValidation, 
+    updateInstitutionValidation 
+} from "../middlewares/validations/institution.validation.js";
 import {
     requireInstitution,
     getMyInstitution,
@@ -17,6 +20,5 @@ institutionRouter.get("/institutions/:id", getInstitutionById);
 institutionRouter.get("/institutions/search/suggestions", getSearchSuggestions);
 //protegidas
 institutionRouter.get("/institutions/my-institution", authenticateToken, requireInstitution, getMyInstitution);
-institutionRouter.put("/institutions/my-institution", authenticateToken, requireInstitution, createInstitutionValidation, updateMyInstitution);
-
+institutionRouter.put("/institutions/my-institution",  authenticateToken, requireInstitution, updateInstitutionValidation, updateMyInstitution);
 export default institutionRouter;

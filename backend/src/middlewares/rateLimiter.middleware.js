@@ -13,7 +13,7 @@ export const authRateLimite = rateLimit({
 });
 export const loginRateLimite = rateLimit({
     windowMs: 15 * 60 * 1000, //cada 15min
-    max: 5, //intentos
+    max: 10, //intentos
     message: {
         ok: false,
         msg: "Demasiados intentos fallidos. Vuelva a intentarlo en 15 minutos."
