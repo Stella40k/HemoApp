@@ -99,3 +99,36 @@ export const desactiveAccount = async(req, res)=>{
         });
     }
 };
+export const getImpactDashboard = async (req, res) =>{
+    try {
+        const user = req.user;
+        const stats = donorStats.medicalProfile;
+        const donorStats = await userModel.findById(user._id)
+            .select('medicalProfile.totalDonations medicalProfile.peopleHelpedEstimate medicalProfile.lastDonationDate profile.bloodType')
+            .lean(); // .lean() para un objeto JS simple y rápido
+
+        if (!donorStats) {
+            return res.status(404).json({ ok: false, msg: "Usuario no encontrado." });
+        }
+        const totalPeopleHelped = stats.peopleHelpedEstimate;
+        const totalDonations = stats.totalDonations;
+
+        res.status(200).json({
+            ok: true,
+            msg: "Métricas de impacto obtenidas.",
+            data: {
+                totalPeopleHelped,
+                totalDonations,
+                lastDonation: stats.lastDonationDate,
+                bloodType: donorStats.profile.bloodType,
+                // Puedes añadir aquí el cálculo de cuánto falta para la próxima donación
+            }
+        });
+    } catch (error) {
+        console.error("error al obtener dashboard de impacto:", error);
+        res.status(500).json({ 
+            ok: false, 
+            msg: "Error interno al cargar métricas." 
+        });
+    }
+}

@@ -1,31 +1,186 @@
 import {userModel} from "../models/user.model.js"
+import { DonationModel } from "../models/donation.model.js";
+import {BloodStockModel} from "../models/bloodStock.model.js"
 
-const getPeopleHelper = (donationType) =>{
-    switch(donationType){
-        case "blood": return 3; 
-        case "plasma": return 1;
-        case "platelets": return 1;
-        default: return 1;
-    }
+const ESTIMATE_HELPER = {
+    blood: 3,    // Sangre entera ayuda a 3 personas
+    plasma: 1,   // Plasma ayuda a 1 persona  
+    platelets: 1,// Plaquetas ayudan a 1 persona
+    unknown: 1
 };
-export class DonationService{
-    static async confitmDonation(userId, type){
-        const helpCount = await userModel.findByIdAndUpdate(
-            userId,{
-                $in:{
-                    "medicalProfile.totalDonations": 1,
-                    "medicalProfile.peopleHelpedEstimate": helpCount
+
+const DEFERRAL_PERIODS = {
+    blood: 90,      // 90 días para donar sangre nuevamente
+    plasma: 30,     // 30 días para plasma
+    platelets: 15,  // 15 días para plaquetas
+    unknown: 90
+};
+
+export class DonationService { //confirmacion de donacion y actualizacion de las metricas
+    static async confirmDonation(userId, type, institutionId = null) {
+        try {
+            //usuario por tipo de sangee
+            const user = await userModel.findById(userId);
+            if (!user) {
+                throw new Error("Usuario no encontrado");
+            }
+
+            //metricas
+            const peopleHelped = ESTIMATE_HELPER[type] || ESTIMATE_HELPER.unknown;
+            const deferralDays = DEFERRAL_PERIODS[type] || DEFERRAL_PERIODS.unknown;
+            const deferralUntil = new Date();
+
+            //buscar despues q hace esto
+            deferralUntil.setDate(deferralUntil.getDate() + deferralDays);
+
+            //actualizacion del usuario
+            const updatedUser = await userModel.findByIdAndUpdate(
+                userId,
+                {
+                    $inc: { 
+                        "medicalProfile.totalDonations": 1,
+                        "medicalProfile.peopleHelpedEstimate": peopleHelped
+                    },
+                    $set: {
+                        "medicalProfile.lastDonationDate": new Date(),
+                        "medicalProfile.temporaryDeferral": true,
+                        "medicalProfile.deferralUntil": deferralUntil,
+                        "medicalProfile.deferralReason": `Donación de ${type} - Periodo de espera normal`
+                    }
                 },
-                $set: {
-                    "medicalProfile.lastDonationDate": new Date(),
-                    "medicalProfile.temporaryDeferral": true //para aplazar temporalmente
+                { new: true }
+            ).select("medicalProfile userName profile.bloodType");
+
+            if (!updatedUser) {
+                throw new Error("Error al actualizar usuario");
+            }
+
+            await this.recordBloodStock(updatedUser, type, institutionId); //registro de trazabilidad
+            await this.createDonationRecord(updatedUser, type, institutionId); //registro de donacion
+
+            console.log(`Donación confirmada para ${updatedUser.userName}. Tipo: ${type}, Personas ayudadas: ${peopleHelped}`);
+
+            return {
+                user: updatedUser,
+                donationDetails: {
+                    type: type,
+                    peopleHelped: peopleHelped,
+                    nextDonationDate: deferralUntil,
+                    bloodType: updatedUser.profile.bloodType
                 }
-            },
-            {new: true}
-        ).select("medicalProfile.totalDonations medicalProfile.peopleHelpedEstimate");
-        if(updateUSer){
-            console.log(`Donacion confirmada para ${userId}. Personas ayudadas: ${updateUSer.medicalProfile.peopleHelpedEstimate}`);
+            };
+
+        } catch (error) {
+            console.error("error en confirmDonation:", error);
+            throw new Error(`Error al confirmar donación: ${error.message}`);
         }
-        return updateUSer
+    }
+
+    static async canUserDonate(userId) { //verificacion de si un usuario puede donar
+        try {
+            const user = await userModel.findById(userId);
+            if (!user) {
+                return { canDonate: false, reason: "Usuario no encontrado" };
+            }
+
+            //verifica estado de cuenta
+            if (user.accountStatus !== 'verified') {
+                return { canDonate: false, reason: "Cuenta no verificada" };
+            }
+
+            //veri.. estado de donacion
+            if (user.donationStatus !== 'active') {
+                return { canDonate: false, reason: "Estado de donación inactivo" };
+            }
+
+            //verifica deferral temporal (periodo de espera obligatorio p/donar)
+            if (user.medicalProfile.temporaryDeferral) {
+                const deferralUntil = user.medicalProfile.deferralUntil;
+                if (deferralUntil && new Date() < deferralUntil) {
+                    return { 
+                        canDonate: false, 
+                        reason: `Puede donar nuevamente el ${deferralUntil.toLocaleDateString()}` 
+                    };
+                }
+            } else {
+                // periodo finalizado, reactivar
+                    await userModel.findByIdAndUpdate(userId, {
+                        "medicalProfile.temporaryDeferral": false,
+                        "medicalProfile.deferralUntil": null,
+                        "medicalProfile.deferralReason": null
+                    });
+            }
+            //ver... aptitud medica
+            if (user.medicalProfile.canDonate === false) {
+                return { canDonate: false, reason: "No apto para donar por razones médicas" };
+            }
+            //si pasa todas las verificaciones
+            return { canDonate: true, reason: "Puede donar" };
+
+        } catch (error) {
+            console.error("error en canUserDonate:", error);
+            return { canDonate: false, reason: "Error interno del servidor" };
+        }
+    }  
+    // obtener estadisticas del usuario
+    static async getUserDonationStats(userId) {
+        try {
+            const user = await userModel.findById(userId)
+                .select("medicalProfile userName profile.bloodType");
+
+            if (!user) {
+                throw new Error("Usuario no encontrado");
+            }
+
+            return {
+                userName: user.userName,
+                bloodType: user.profile.bloodType,
+                totalDonations: user.medicalProfile.totalDonations || 0,
+                peopleHelped: user.medicalProfile.peopleHelpedEstimate || 0,
+                lastDonation: user.medicalProfile.lastDonationDate,
+                canDonate: user.medicalProfile.canDonate,
+                temporaryDeferral: user.medicalProfile.temporaryDeferral,
+                deferralUntil: user.medicalProfile.deferralUntil
+            };
+
+        } catch (error) {
+            console.error("error en getUserDonationStats:", error);
+            throw error;
+        }
+    }
+
+    // registro en stock de sangre
+    static async recordBloodStock(user, donationType, institutionId) {
+        try {
+            const stockRecord = new BloodStockModel({
+                institution: institutionId,
+                bloodType: user.profile.bloodType,
+                transactionType: "input", // entrada de sangre al stock
+                quantity: 1,
+                donationType: donationType,
+                relatedEntity: user._id,
+                entityModel: "User"
+            });
+            await stockRecord.save();
+        } catch (error) {
+            console.error("error al registrar stock:", error);
+        }
+    }
+
+    // crear registro de donacion
+    static async createDonationRecord(user, donationType, institutionId) {
+        try {
+            const donationRecord = new DonationModel({
+                donor: user._id,
+                institution: institutionId,
+                donationType: donationType,
+                bloodType: user.profile.bloodType,
+                peopleHelped: ESTIMATE_HELPER[donationType],
+                status: "completed"
+            });
+            await donationRecord.save();
+        } catch (error) {
+            console.error("error al crear registro de donacion:", error);
+        }
     }
 }

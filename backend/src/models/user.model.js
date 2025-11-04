@@ -163,10 +163,7 @@ const userSchema = new Schema({
     },
     //apartado para las notificciones
     notificationPreferences:{
-        emergencyAlerts:{
-            type: Boolean,
-            default: true
-        },
+        //campos q el usuario puede activar
         bloodMatch:{
             type: Boolean,
             default: true
@@ -181,6 +178,21 @@ const userSchema = new Schema({
         },
         locationBasedAlerts:{ //por si hay campañas de donaciones
             type: Boolean,
+            default: true
+        },
+        //campos generales
+        frequency: { //frecuencia para alertas no esenciales como bloodMatch, newsUpdates
+            type: String,
+            enum: ['diario', 'semanal', 'mensual', 'pausado'],
+            default: 'semanal'
+        },
+        //control total de notis no esenciales
+        isActive: { 
+            type: Boolean,
+            default: true
+        },
+        emergencyAlerts: { // Solo para fines de auditoría/visualización en el perfil
+            type: Boolean, 
             default: true
         }
     },

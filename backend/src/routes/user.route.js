@@ -2,7 +2,8 @@ import express from "express";
 import {
     updateProfile,
     updateDonationStatus,
-    desactiveAccount
+    desactiveAccount,
+    getImpactDashboard
 } from "../controller/user.controller.js"
 import{
     getOnboardingStep,
@@ -24,5 +25,7 @@ userRouter.post("/user/onboarding/answer", authenticateToken, saveOnboardingAnsw
 userRouter.get("/user/onboarding/progress", authenticateToken, getOnboardingProgres);
 export default userRouter;
 
+//ruta para el dashboard de donaciones
+userRouter.get("/user/impact-dashboard", authenticateToken, getImpactDashboard);
 
 ///al servicio deben llegar limpio los datos, se le aplican middlewares tambien
