@@ -17,39 +17,37 @@ const DEFERRAL_PERIODS = {
 };
 
 export class DonationService { //confirmacion de donacion y actualizacion de las metricas
-    static async confirmDonation(userId, type, institutionId = null) {
+    static async finalizeDonation(donationId, confirmerId) {
         try {
             //usuario por tipo de sangee
-            const user = await userModel.findById(userId);
-            if (!user) {
-                throw new Error("Usuario no encontrado");
+            const donation = await DonationModel.findById(donationId).populate('donor')
+            if (!donation || donation.status === 'confirmed') {
+                throw new Error("Registro de donación inválido o ya confirmado.");
             }
 
             //metricas
-            const peopleHelped = ESTIMATE_HELPER[type] || ESTIMATE_HELPER.unknown;
-            const deferralDays = DEFERRAL_PERIODS[type] || DEFERRAL_PERIODS.unknown;
-            const deferralUntil = new Date();
+            const donorId = donation.donor._id;
+            const donationType = donation.type;
+            const institutionId = donation.institution;
+            const bloodType = donation.donor.profile.bloodType;
 
-            //buscar despues q hace esto
-            deferralUntil.setDate(deferralUntil.getDate() + deferralDays);
-
+            const peopleHelped = ESTIMATE_HELPER[donationType] || ESTIMATE_HELPER.unknown;
+            const deferralDays = DEFERRAL_PERIODS[donationType] || DEFERRAL_PERIODS.unknown;
+            // Calcula la fecha en la que el donante puede volver a donar
+            const deferralUntil = new Date(Date.now() + deferralDays * 24 * 60 * 60 * 1000);
             //actualizacion del usuario
-            const updatedUser = await userModel.findByIdAndUpdate(
-                userId,
-                {
-                    $inc: { 
-                        "medicalProfile.totalDonations": 1,
-                        "medicalProfile.peopleHelpedEstimate": peopleHelped
-                    },
-                    $set: {
-                        "medicalProfile.lastDonationDate": new Date(),
-                        "medicalProfile.temporaryDeferral": true,
-                        "medicalProfile.deferralUntil": deferralUntil,
-                        "medicalProfile.deferralReason": `Donación de ${type} - Periodo de espera normal`
-                    }
+            const updatedUser = await userModel.findByIdAndUpdate(donorId, {
+                $inc: { // Incrementa los contadores
+                    "medicalProfile.totalDonations": 1,
+                    "medicalProfile.peopleHelpedEstimate": peopleHelped
                 },
-                { new: true }
-            ).select("medicalProfile userName profile.bloodType");
+                $set: { // Actualiza la fecha y el aplazamiento temporal
+                    "medicalProfile.lastDonationDate": new Date(),
+                    "medicalProfile.temporaryDeferral": true,
+                    "medicalProfile.deferralUntil": deferralUntil,
+                    "medicalProfile.deferralReason": `Donación de ${donationType}. Próxima donación posible: ${deferralUntil.toLocaleDateString()}`
+                }
+            }, { new: true });
 
             if (!updatedUser) {
                 throw new Error("Error al actualizar usuario");
