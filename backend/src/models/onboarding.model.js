@@ -1,5 +1,4 @@
-import mongoose from "mongoose";
-import { Schema, model } from "mongoose";
+import { Schema, mongoose } from "mongoose";
 
 const onboardingSchema = new Schema({
     step: { //define el orden de aparicion de la pregunta
