@@ -1,4 +1,4 @@
-import {userMdel} from "../models/user.model.js"
+import {userModel} from "../models/user.model.js"
 
 const getPeopleHelper = (donationType) =>{
     switch(donationType){
@@ -10,7 +10,7 @@ const getPeopleHelper = (donationType) =>{
 };
 export class DonationService{
     static async confitmDonation(userId, type){
-        const helpCount = await userMdel.findByIdAndUpdate(
+        const helpCount = await userModel.findByIdAndUpdate(
             userId,{
                 $in:{
                     "medicalProfile.totalDonations": 1,
