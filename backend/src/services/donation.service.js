@@ -49,12 +49,12 @@ export class DonationService { //confirmacion de donacion y actualizacion de las
                 }
             }, { new: true });
 
-            if (!updatedUser) {
-                throw new Error("Error al actualizar usuario");
-            }
-
-            await this.recordBloodStock(updatedUser, type, institutionId); //registro de trazabilidad
-            await this.createDonationRecord(updatedUser, type, institutionId); //registro de donacion
+            await this.recordBloodStock(updatedUser, donationType, institutionId); //registro de trazabilidad
+            await DonationModel.findByIdAndUpdate(donationId, {
+                status: "confirmed",
+                confirmedBy: confirmerId, // Quién (Moderador/Institución) lo validó
+                donationDate: new Date(), // Fecha real de la donación
+            }); //registro de donacion
 
             console.log(`Donación confirmada para ${updatedUser.userName}. Tipo: ${type}, Personas ayudadas: ${peopleHelped}`);
 
