@@ -26,9 +26,9 @@ import icono1 from "@/assets/icono-1.png";
 import icono2 from "@/assets/icono-2.png";
 import icono3 from "@/assets/icono-3.png";
 import icono4 from "@/assets/icono-4.png";
-import recurso7 from "@/assets/Recurso-7.png";
-import recurso8 from "@/assets/Recurso-8.png";
-import recurso9 from "@/assets/Recurso-9.png";
+import iconosangre from "@/assets/icono-sangre.png";
+import instimarca from "@/assets/ipf-marca.png";
+import carreramarca from "@/assets/tsdsm-marca.png";
 
 export default function LandingPage() {
   return (
@@ -65,7 +65,7 @@ export default function LandingPage() {
       </nav>
 
       {/* Sección Hero - Presentación principal con gradiente */}
-      <section className="bg-gradient-to-br from-primary via-accent to-primary py-20 px-6 relative overflow-hidden min-h-[600px]">
+      <section className="bg-gradient-to-b from-card-foreground to-primary py-20 px-6 relative overflow-hidden min-h-[600px]">
         <div className="absolute right-0 top-1/4 w-[500px] h-[500px] bg-secondary/40 rounded-full blur-3xl"></div>
         <div className="absolute right-20 top-1/2 w-[400px] h-[400px] bg-accent/30 rounded-full blur-3xl"></div>
         <div className="container mx-auto relative z-10">
@@ -110,11 +110,9 @@ export default function LandingPage() {
       {/* Features Section */}
       <section
         id="servicios"
-        className="py-16 px-6"
-        style={{
-          backgroundImage: `url(${recurso7}) !important`,
-        }}
-      >
+        className="py-16 px-6" style={{
+        backgroundColor: 'hsl(341 64% 35%)' // El valor HSL directo de tu marca
+    }}>
         <div className="container mx-auto">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div className="grid grid-cols-2 gap-8">
@@ -187,85 +185,101 @@ export default function LandingPage() {
       </section>
 
       {/* Info Section */}
-      <section className="py-16 px-6 bg-gradient-to-br from-accent via-secondary to-accent">
-        <div className="container mx-auto">
-          <h2 className="text-4xl font-bold text-center text-primary-foreground mb-12">
-            ¿Qué necesito saber para donar?
-          </h2>
-          <div className="max-w-4xl mx-auto bg-card p-8 rounded-3xl shadow-2xl">
-            <h3 className="text-2xl font-bold text-primary mb-4">
-              Requisitos básicos:
+      <section className="bg-gradient-to-b from-primary to-accent py-20 px-6 relative overflow-hidden min-h-[600px]">
+  <div className="container mx-auto">
+    
+    {/* TÍTULO PRINCIPAL DE LA SECCIÓN */}
+    <h2 className="text-4xl font-bold text-center text-primary-foreground mb-12">
+        ¿Qué necesito saber para donar?
+    </h2>
+    
+    {/* CONTENEDOR DE DOS COLUMNAS (Grid simple sin fondo de tarjeta) */}
+    <div className="grid md:grid-cols-2 gap-12 max-w-5xl mx-auto p-0">
+        
+        {/* COLUMNA 1: REQUISITOS BÁSICOS (✓) */}
+        <div>
+            <h3 className="text-2xl font-bold text-primary-foreground mb-4">
+                Requisitos básicos:
             </h3>
-            <ul className="space-y-2 text-card-foreground mb-6">
-              <li className="flex items-start gap-2">
-                <span className="text-accent text-xl">✓</span>
-                <span>Tener entre 18 y 65 años</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-accent text-xl">✓</span>
-                <span>Pesar más de 50 kg</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-accent text-xl">✓</span>
-                <span>Estar en buen estado de salud</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-accent text-xl">✓</span>
-                <span>No haber donado en los últimos 3 meses</span>
-              </li>
+            <ul className="space-y-4 text-primary-foreground">
+                <li className="flex items-start gap-3">
+                    <span className="text-white text-xl font-bold">✓</span>
+                    <span>Tener entre 18 y 65 años</span>
+                </li>
+                <li className="flex items-start gap-3">
+                    <span className="text-white text-xl font-bold">✓</span>
+                    <span>Pesar más de 50 kg</span>
+                </li>
+                <li className="flex items-start gap-3">
+                    <span className="text-white text-xl font-bold">✓</span>
+                    <span>Estar en buen estado de salud</span>
+                </li>
+                <li className="flex items-start gap-3">
+                    <span className="text-white text-xl font-bold">✓</span>
+                    <span>No haber donado en los últimos 3 meses</span>
+                </li>
             </ul>
-            <h3 className="text-2xl font-bold text-destructive mb-4">
-              No puedes donar si:
-            </h3>
-            <ul className="space-y-2 text-card-foreground">
-              <li className="flex items-start gap-2">
-                <span className="text-destructive text-xl">✗</span>
-                <span>
-                  Tienes tatuajes o piercings recientes (menos de 12 meses)
-                </span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-destructive text-xl">✗</span>
-                <span>
-                  Has tenido fiebre o infecciones en las últimas 2 semanas
-                </span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-destructive text-xl">✗</span>
-                <span>Estás embarazada o amamantando</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-destructive text-xl">✗</span>
-                <span>Has tenido cirugías recientes</span>
-              </li>
-            </ul>
-          </div>
         </div>
-      </section>
+
+        {/* COLUMNA 2: EXCLUSIONES (✗) */}
+        <div>
+            <h3 className="text-2xl font-bold text-primary-foreground mb-4">
+                No puedes donar si:
+            </h3>
+            <ul className="space-y-4 text-primary-foreground">
+                <li className="flex items-start gap-3">
+                    <span className="text-white text-xl font-bold">✗</span>
+                    <span>Tienes tatuajes o piercings recientes (menos de 12 meses)</span>
+                </li>
+                <li className="flex items-start gap-3">
+                    <span className="text-white text-xl font-bold">✗</span>
+                    <span>Has tenido fiebre o infecciones en las últimas 2 semanas</span>
+                </li>
+                <li className="flex items-start gap-3">
+                    <span className="text-white text-xl font-bold">✗</span>
+                    <span>Estás embarazada o amamantando</span>
+                </li>
+                <li className="flex items-start gap-3">
+                    <span className="text-white text-xl font-bold">✗</span>
+                    <span>Has tenido cirugías recientes</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+  </div>
+</section>
 
       {/* FAQ Section */}
-      <section className="py-16 px-6 bg-gradient-to-br from-accent via-primary to-accent">
+      <section className="py-16 px-6 bg-gradient-to-br from-accent to-card-foreground">
         <div className="container mx-auto max-w-5xl">
-          <div className="grid md:grid-cols-2 gap-8 mb-12">
+          <div className="flex justify-between gap-8 mb-12">
             <div className="text-primary-foreground">
-              <h3 className="text-3xl font-bold mb-4">
+              <h3 className="text-3xl font-bold mb-4 text-left">
                 ¿Es seguro donar sangre con HemoApp?
               </h3>
-              <p className="text-lg">
+              <p className="text-lg text-left">
                 Sí, trabajamos únicamente con bancos de sangre y hospitales
                 certificados
               </p>
             </div>
-            <div className="text-primary-foreground">
-              <h3 className="text-3xl font-bold mb-4">
+
+            <div className="hidden md:flex justify-center items-center">
+              <img
+              src={iconosangre} 
+              alt="IconoTransfución"
+              className="w-45 object-contain mx-auto" />
+            </div>
+
+            <div className="w-1/2 text-primary-foreground">
+              <h3 className="text-3xl font-bold mb-4 text-left">
                 ¿Tiene costo de servicio?
               </h3>
-              <p className="text-lg">
+              <p className="text-lg text-left">
                 No, HemoApp es totalmente gratuito para donantes y pacientes
               </p>
             </div>
           </div>
-          <div className="text-center bg-gradient-to-b from-accent to-secondary py-12 rounded-3xl">
+          <div className="text-center py-12 px-8">
             <h3 className="text-4xl font-bold text-primary-foreground mb-4">
               ¿Cómo me registro?
             </h3>
@@ -278,45 +292,30 @@ export default function LandingPage() {
       </section>
 
       {/* Contact / Nosotros Section */}
-      <section id="nosotros" className="py-16 px-6 bg-danger">
-        <div className="container mx-auto max-w-4xl">
-          <h2 className="text-4xl font-bold text-primary-foreground mb-4">
-            Nosotros
-          </h2>
-          <p className="text-lg text-primary-foreground/90 mb-6">
-            Somos un equipo comprometido con facilitar la donación de sangre en
-            Argentina. Si querés contactarnos para colaborar, reportar un
-            problema o solicitar más información, escribinos a{" "}
-            <a
-              href="mailto:contacto@hemoapp.org"
-              className="text-accent underline"
-            >
-              contacto@hemoapp.org
-            </a>
-            o llamanos al <strong className="ml-1">+54 9 371 000-0000</strong>.
-          </p>
+      <section id="nosotros" className="py-16 px-6 bg-foreground">
+        <div className="container mx-auto max-w-7xl">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-8">
+            <div className="md:w-3/4">
 
-          <div className="grid md:grid-cols-2 gap-6">
-            <div className="bg-card p-6 rounded-lg">
-              <h3 className="font-semibold mb-2">Colaborá con HemoApp</h3>
-              <p className="text-sm text-muted-foreground">
-                Si sos una institución de salud y querés integrar tus
-                solicitudes, escribinos y te contactaremos.
-              </p>
+          <h2 className="text-4xl font-bold text-primary-foreground mb-4">
+            Quiénes somos
+          </h2>
+          <p className="text-xl text-primary-foreground/90 mb-4">
+          Somos dos estudiantes de la Tecnicatura Superior de Desarrollo de Software, 
+      comprometidos con minimizar la brecha crítica entre donantes, pacientes 
+      e instituciones de hemoterapia.
+          </p>
+         </div>
+         <div className="md:w-1/4 flex justify-end items-center gap-4">
+          <img src={instimarca} alt="Marca IPF" className="w-28 object-contain"/>
+          <img src={carreramarca} alt="marca de la carrera" className="w-32 object-contain"/>
             </div>
-            <div className="bg-card p-6 rounded-lg">
-              <h3 className="font-semibold mb-2">Soporte técnico</h3>
-              <p className="text-sm text-muted-foreground">
-                Reportá un bug o problema en la plataforma y nuestro equipo te
-                ayudará.
-              </p>
-            </div>
-          </div>
-        </div>
+         </div>
+         </div>
       </section>
 
       {/* Footer */}
-      <footer className="py-8 px-6 bg-primary">
+      <footer className="py-8 px-6 bg-foreground">
         <div className="container mx-auto text-center">
           <div className="flex justify-center gap-6 text-primary-foreground">
             <a href="#nosotros" className="hover:opacity-80">
