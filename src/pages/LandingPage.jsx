@@ -66,8 +66,8 @@ export default function LandingPage() {
 
       {/* Sección Hero - Presentación principal con gradiente */}
       <section className="bg-gradient-to-b from-card-foreground to-primary py-20 px-6 relative overflow-hidden min-h-[600px]">
-        <div className="absolute right-0 top-1/4 w-[500px] h-[500px] bg-secondary/40 rounded-full blur-3xl"></div>
-        <div className="absolute right-20 top-1/2 w-[400px] h-[400px] bg-accent/30 rounded-full blur-3xl"></div>
+        <div className="absolute top-1/4 w-[400px] h-[400px] bg-secondary/40 rounded-full blur-3xl"></div>
+        <div className="absolute right-20 top-1/2 w-[300px] h-[300px] bg-accent/30 rounded-full blur-3xl"></div>
         <div className="container mx-auto relative z-10">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
@@ -250,7 +250,7 @@ export default function LandingPage() {
 </section>
 
       {/* FAQ Section */}
-      <section className="py-16 px-6 bg-gradient-to-br from-accent to-card-foreground">
+      <section className="bg-gradient-to-b from-accent to-card-foreground py-20 px-6 relative overflow-hidden min-h-[600px]">
         <div className="container mx-auto max-w-5xl">
           <div className="flex justify-between gap-8 mb-12">
             <div className="text-primary-foreground">
