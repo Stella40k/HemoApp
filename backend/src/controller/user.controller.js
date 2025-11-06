@@ -102,14 +102,18 @@ export const desactiveAccount = async(req, res)=>{
 export const getImpactDashboard = async (req, res) =>{
     try {
         const user = req.user;
-        const stats = donorStats.medicalProfile;
         const donorStats = await userModel.findById(user._id)
             .select('medicalProfile.totalDonations medicalProfile.peopleHelpedEstimate medicalProfile.lastDonationDate profile.bloodType')
             .lean(); // .lean() para un objeto JS simple y rápido
 
         if (!donorStats) {
-            return res.status(404).json({ ok: false, msg: "Usuario no encontrado." });
+            return res.status(404).json({ 
+                ok: false, 
+                msg: "Usuario no encontrado." 
+            });
         }
+        const stats = donorStats.medicalProfile;
+        //logica de respuesta
         const totalPeopleHelped = stats.peopleHelpedEstimate;
         const totalDonations = stats.totalDonations;
 

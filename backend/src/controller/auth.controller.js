@@ -64,7 +64,7 @@ export const login = async(req, res)=>{
                 msg: "credenciales incorrectas"
             });
         }
-        if(!user.role === "institution"){
+        if(user.role === "institution"){
             if(user.accountStatus === "pending_validation"){
                 return res.status(401).json({
                     ok: false,
@@ -75,7 +75,7 @@ export const login = async(req, res)=>{
         if(!user.emailVerified || user.accountStatus !== "verified"){
             return res.status(401).json({
                 ok: false,
-                msg: "Cuenta no verificada. Por favor verifica tu email"
+                msg: "Cuenta no verificada. Por favor verifica tu email o espera la aprobación del moderador."
             });
         }
         const accessToken = generateToken(user);

@@ -1,5 +1,6 @@
 import { DonationModel } from "../models/donation.model.js";
 import {DonationService } from "../services/donation.service.js"
+import { InstitutionModel } from "../models/institution.model.js";
 
 //es para registrar al usuario su intencion de donar
 export const registerDonationIntention = async(req, res)=>{
@@ -29,7 +30,7 @@ export const registerDonationIntention = async(req, res)=>{
 export const confirmDonation = async(req, res) =>{
     try {
         const {donationId} = req.params;
-        const donation = await DonationModel.findById(donationId);
+        const donation = await DonationModel.findById(donationId).populate("donor");
         
         if (!donation) {
             return res.status(404).json({
@@ -37,33 +38,30 @@ export const confirmDonation = async(req, res) =>{
                 msg: "Donación no encontrada"
             });
         }
-        if(donation.institution.toString() !== req.user.institutionId.toString()){
+        const userInstitution = await InstitutionModel.findOne({ user: req.user._id });
+        const institutionId = userInstitution ? userInstitution._id : null;
+
+        if(!institutionId || donation.institution.toString() !== req.user.institutionId.toString()){
             return res.status(403).json({
                 ok: false,
                 msg: "No tienes permiso para confirma esta donacion."
             });
         }
         if(donation.status === "confirmed"){
-            return res.status(403).json({
+            return res.status(400).json({
                 ok: false,
                 msg: "La donacion ya fue confirmada."
             });
         }
-        //actualizacion para el estado e historial de la donacion
-        donation.status = "confirmed";
-        donation.confirmedBy = req.user._id; 
-        donation.donationDate = new Date();
-        await donation.save();
-
         //para las metricas
-        const updatedUser = await DonationService.confirmDonation(donation.donor, donation.type);
-
+        const updatedUser = await DonationService.finalizeDonation(donationId, req.user._id);
         res.status(200).json({
             ok: true,
             msg: "Donación confirmada exitosamente. Las métricas del donante han sido actualizadas.",
             data: { 
-                donation: donation,
-                peopleHelped: updatedUser.medicalProfile.peopleHelpedEstimate 
+                donationId: donation._id,
+                peopleHelped: updatedUser.medicalProfile.peopleHelpedEstimate,
+                nextDonationDate: updatedUser.medicalProfile.deferralUntil // Retorna la fecha de aplazamiento
             }
         });
     } catch (error) {
