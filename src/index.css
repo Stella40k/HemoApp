@@ -1,3 +1,25 @@
+/**
+ * index.css - Estilos globales y sistema de diseño de HemoApp
+ * 
+ * ¿Qué hace?
+ * - Define las variables CSS personalizadas (custom properties) del sistema de diseño
+ * - Importa Tailwind CSS para utility classes
+ * - Establece la paleta de colores de la aplicación
+ * 
+ * ¿Para qué sirve?
+ * - Mantener consistencia de colores en toda la aplicación
+ * - Facilitar cambios de tema (light/dark)
+ * - Proporcionar variables reutilizables para componentes
+ * 
+ * Paleta de colores HemoApp:
+ * - Primary: Vino/Burgundy (#942044) - Color principal de marca
+ * - Accent: Rojo brillante (#E5203A) - Para acciones importantes
+ * - Background: Rosa muy claro (#FFDBE8) - Fondo general
+ * - Secondary: Rosa claro (#FF94B2) - Elementos secundarios
+ * 
+ * Todas las variables CSS usan el formato HSL para facilitar modificaciones
+ */
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -8,7 +30,7 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Nuevos colores del sistema HemoApp */
+    /* Colores personalizados del sistema HemoApp */
     --negro-oscuro: 0 68% 7%; /* #200606 */
     --rosa-muy-claro: 338 100% 93%; /* #FFDBE8 */
     --marca-principal-vino: 341 64% 35%; /* #942044 */

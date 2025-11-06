@@ -1,3 +1,26 @@
+/**
+ * avatar.jsx - Componente de avatar/foto de perfil
+ *
+ * ¿Qué hace?
+ * - Muestra la imagen de perfil del usuario con un diseño circular
+ * - Proporciona un fallback (respaldo) cuando no hay imagen
+ *
+ * ¿Para qué sirve?
+ * - Mostrar fotos de perfil de usuarios
+ * - Representación visual de usuarios en la interfaz
+ * - Fallback con iniciales cuando no hay foto
+ *
+ * Componentes:
+ * - Avatar: Contenedor circular principal (40x40px por defecto)
+ * - AvatarImage: Imagen real del usuario
+ * - AvatarFallback: Contenido que se muestra si la imagen no carga (ej: iniciales)
+ *
+ * Características:
+ * - Basado en Radix UI para carga progresiva
+ * - Automáticamente muestra el fallback si la imagen falla
+ * - Tamaño y forma personalizables
+ */
+
 import * as React from "react";
 import * as AvatarPrimitive from "@radix-ui/react-avatar";
 

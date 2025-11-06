@@ -1,30 +1,77 @@
-import { useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import Header from '@/components/Header';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Camera, Award, Heart, Droplet, LogOut, Edit } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+/**
+ * ProfilePage.jsx - Página de perfil del usuario
+ *
+ * ¿Qué hace?
+ * - Muestra y permite editar la información personal del donante
+ * - Gestiona la foto de perfil del usuario
+ * - Muestra el historial de donaciones
+ * - Permite registrar nuevas donaciones
+ * - Muestra logros y badges del donante
+ *
+ * ¿Para qué sirve?
+ * - Gestión completa del perfil del usuario
+ * - Seguimiento del historial de donaciones
+ * - Visualización del impacto (vidas salvadas)
+ * - Actualización de datos personales
+ *
+ * Funcionalidades principales:
+ * - Edición de datos personales (nombre, email, tipo de sangre, peso)
+ * - Carga de foto de perfil desde el dispositivo
+ * - Registro de donaciones previas con fecha, hospital y unidades
+ * - Visualización de estadísticas (total donaciones, vidas salvadas)
+ * - Sistema de logros/badges por donaciones
+ *
+ * Props:
+ * - user: Objeto con datos del usuario actual
+ * - onLogout: Función para cerrar sesión
+ * - onUpdateUser: Función para actualizar datos del usuario en el estado global
+ */
+
+import { useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import Header from "@/components/Header";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Camera, Award, Heart, Droplet, LogOut, Edit } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 export default function ProfilePage({ user, onLogout, onUpdateUser }) {
+  // Estado para la imagen de perfil
   const [profileImage, setProfileImage] = useState(user.profileImage || null);
+  // Estado que controla si el formulario está en modo edición
   const [isEditing, setIsEditing] = useState(false);
+  // Estado del formulario con los datos editables del usuario
   const [formData, setFormData] = useState({
-    firstName: user.firstName || '',
-    lastName: user.lastName || '',
-    email: user.email || '',
-    bloodType: user.bloodType || '',
-    weight: user.weight || '',
+    firstName: user.firstName || "",
+    lastName: user.lastName || "",
+    email: user.email || "",
+    bloodType: user.bloodType || "",
+    weight: user.weight || "",
   });
+  // Referencia al input de archivo para la foto de perfil
   const fileInputRef = useRef(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  /**
+   * handleImageUpload - Maneja la carga de la foto de perfil
+   * ¿Qué hace?
+   * - Lee el archivo de imagen seleccionado
+   * - Convierte la imagen a Base64
+   * - Actualiza el estado y localStorage
+   * - Muestra notificación de éxito
+   */
   const handleImageUpload = (e) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -32,17 +79,17 @@ export default function ProfilePage({ user, onLogout, onUpdateUser }) {
       reader.onloadend = () => {
         const imageUrl = reader.result;
         setProfileImage(imageUrl);
-        
+
         // Update user in localStorage
         const updatedUser = { ...user, profileImage: imageUrl };
         onUpdateUser(updatedUser);
-        localStorage.setItem('hemoapp_user', JSON.stringify(updatedUser));
-        
-        const users = JSON.parse(localStorage.getItem('hemoapp_users') || '[]');
+        localStorage.setItem("hemoapp_user", JSON.stringify(updatedUser));
+
+        const users = JSON.parse(localStorage.getItem("hemoapp_users") || "[]");
         const userIndex = users.findIndex((u) => u.id === user.id);
         if (userIndex !== -1) {
           users[userIndex] = updatedUser;
-          localStorage.setItem('hemoapp_users', JSON.stringify(users));
+          localStorage.setItem("hemoapp_users", JSON.stringify(users));
         }
 
         toast({
@@ -56,19 +103,19 @@ export default function ProfilePage({ user, onLogout, onUpdateUser }) {
 
   const handleLogout = () => {
     onLogout();
-    navigate('/');
+    navigate("/");
   };
 
   const handleUpdateProfile = () => {
     const updatedUser = { ...user, ...formData };
     onUpdateUser(updatedUser);
-    localStorage.setItem('hemoapp_user', JSON.stringify(updatedUser));
-    
-    const users = JSON.parse(localStorage.getItem('hemoapp_users') || '[]');
+    localStorage.setItem("hemoapp_user", JSON.stringify(updatedUser));
+
+    const users = JSON.parse(localStorage.getItem("hemoapp_users") || "[]");
     const userIndex = users.findIndex((u) => u.id === user.id);
     if (userIndex !== -1) {
       users[userIndex] = updatedUser;
-      localStorage.setItem('hemoapp_users', JSON.stringify(users));
+      localStorage.setItem("hemoapp_users", JSON.stringify(users));
     }
 
     setIsEditing(false);
@@ -79,47 +126,72 @@ export default function ProfilePage({ user, onLogout, onUpdateUser }) {
   };
 
   const getInitials = () => {
-    return `${user.firstName?.[0] || ''}${user.lastName?.[0] || ''}`.toUpperCase();
+    return `${user.firstName?.[0] || ""}${
+      user.lastName?.[0] || ""
+    }`.toUpperCase();
   };
 
   const badges = [
-    { id: 1, name: 'Primera Donación', icon: Heart, color: 'bg-accent' },
-    { id: 2, name: '5 Donaciones', icon: Droplet, color: 'bg-primary' },
-    { id: 3, name: 'Donante Regular', icon: Award, color: 'bg-yellow-500' },
+    { id: 1, name: "Primera Donación", icon: Heart, color: "bg-accent" },
+    { id: 2, name: "5 Donaciones", icon: Droplet, color: "bg-primary" },
+    { id: 3, name: "Donante Regular", icon: Award, color: "bg-yellow-500" },
   ];
 
   // Donations data
   const userDonations = user.donations || [];
   const donationCount = userDonations.length || user.donationCount || 0;
-  const lastDonationDate = userDonations.length > 0 ? userDonations[userDonations.length - 1].date : user.lastDonation;
+  const lastDonationDate =
+    userDonations.length > 0
+      ? userDonations[userDonations.length - 1].date
+      : user.lastDonation;
   const livesSaved = donationCount * 3;
 
-  const [donationForm, setDonationForm] = useState({ date: '', hospital: '', units: 1, bloodType: user.bloodType || '' });
+  const [donationForm, setDonationForm] = useState({
+    date: "",
+    hospital: "",
+    units: 1,
+    bloodType: user.bloodType || "",
+  });
 
   const addDonation = () => {
     if (!donationForm.date || !donationForm.hospital) {
-      toast({ title: 'Faltan datos', description: 'Completa fecha y hospital', variant: 'destructive' });
+      toast({
+        title: "Faltan datos",
+        description: "Completa fecha y hospital",
+        variant: "destructive",
+      });
       return;
     }
-    const updatedUser = { ...user, donations: [...(user.donations || []), donationForm] };
+    const updatedUser = {
+      ...user,
+      donations: [...(user.donations || []), donationForm],
+    };
     updatedUser.donationCount = updatedUser.donations.length;
     updatedUser.lastDonation = donationForm.date;
     onUpdateUser(updatedUser);
-    localStorage.setItem('hemoapp_user', JSON.stringify(updatedUser));
-    const users = JSON.parse(localStorage.getItem('hemoapp_users') || '[]');
+    localStorage.setItem("hemoapp_user", JSON.stringify(updatedUser));
+    const users = JSON.parse(localStorage.getItem("hemoapp_users") || "[]");
     const idx = users.findIndex((u) => u.id === user.id);
     if (idx !== -1) {
       users[idx] = updatedUser;
-      localStorage.setItem('hemoapp_users', JSON.stringify(users));
+      localStorage.setItem("hemoapp_users", JSON.stringify(users));
     }
-    setDonationForm({ date: '', hospital: '', units: 1, bloodType: user.bloodType || '' });
-    toast({ title: 'Donación registrada', description: 'Se agregó la donación al historial' });
+    setDonationForm({
+      date: "",
+      hospital: "",
+      units: 1,
+      bloodType: user.bloodType || "",
+    });
+    toast({
+      title: "Donación registrada",
+      description: "Se agregó la donación al historial",
+    });
   };
 
   return (
     <div className="min-h-screen bg-background">
       <Header user={user} onLogout={onLogout} />
-      
+
       <div className="container mx-auto py-8 px-6">
         <div className="max-w-4xl mx-auto">
           {/* Profile Header */}
@@ -156,16 +228,17 @@ export default function ProfilePage({ user, onLogout, onUpdateUser }) {
                       </h1>
                       <p className="text-muted-foreground mb-4">{user.email}</p>
                       <div className="flex flex-wrap gap-2 justify-center md:justify-start mb-4">
-                        <Badge variant="outline" className="bg-accent/10 text-accent border-accent">
+                        <Badge
+                          variant="outline"
+                          className="bg-accent/10 text-accent border-accent"
+                        >
                           <Droplet className="w-3 h-3 mr-1" />
                           {user.bloodType}
                         </Badge>
-                        <Badge variant="outline">
-                          {user.weight} kg
-                        </Badge>
+                        <Badge variant="outline">{user.weight} kg</Badge>
                       </div>
-                      <Button 
-                        onClick={() => setIsEditing(true)} 
+                      <Button
+                        onClick={() => setIsEditing(true)}
                         variant="outline"
                         className="mt-2"
                       >
@@ -181,7 +254,12 @@ export default function ProfilePage({ user, onLogout, onUpdateUser }) {
                           <Input
                             id="firstName"
                             value={formData.firstName}
-                            onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                            onChange={(e) =>
+                              setFormData({
+                                ...formData,
+                                firstName: e.target.value,
+                              })
+                            }
                           />
                         </div>
                         <div className="space-y-2">
@@ -189,7 +267,12 @@ export default function ProfilePage({ user, onLogout, onUpdateUser }) {
                           <Input
                             id="lastName"
                             value={formData.lastName}
-                            onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                            onChange={(e) =>
+                              setFormData({
+                                ...formData,
+                                lastName: e.target.value,
+                              })
+                            }
                           />
                         </div>
                       </div>
@@ -199,13 +282,20 @@ export default function ProfilePage({ user, onLogout, onUpdateUser }) {
                           id="email"
                           type="email"
                           value={formData.email}
-                          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                          onChange={(e) =>
+                            setFormData({ ...formData, email: e.target.value })
+                          }
                         />
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
                           <Label htmlFor="bloodType">Tipo de Sangre</Label>
-                          <Select value={formData.bloodType} onValueChange={(value) => setFormData({ ...formData, bloodType: value })}>
+                          <Select
+                            value={formData.bloodType}
+                            onValueChange={(value) =>
+                              setFormData({ ...formData, bloodType: value })
+                            }
+                          >
                             <SelectTrigger>
                               <SelectValue />
                             </SelectTrigger>
@@ -227,15 +317,26 @@ export default function ProfilePage({ user, onLogout, onUpdateUser }) {
                             id="weight"
                             type="number"
                             value={formData.weight}
-                            onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
+                            onChange={(e) =>
+                              setFormData({
+                                ...formData,
+                                weight: e.target.value,
+                              })
+                            }
                           />
                         </div>
                       </div>
                       <div className="flex gap-2">
-                        <Button onClick={handleUpdateProfile} className="flex-1">
+                        <Button
+                          onClick={handleUpdateProfile}
+                          className="flex-1"
+                        >
                           Guardar Cambios
                         </Button>
-                        <Button onClick={() => setIsEditing(false)} variant="outline">
+                        <Button
+                          onClick={() => setIsEditing(false)}
+                          variant="outline"
+                        >
                           Cancelar
                         </Button>
                       </div>
@@ -253,7 +354,9 @@ export default function ProfilePage({ user, onLogout, onUpdateUser }) {
                 <CardTitle className="text-lg">Donaciones</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-4xl font-bold text-primary">{donationCount}</p>
+                <p className="text-4xl font-bold text-primary">
+                  {donationCount}
+                </p>
                 <p className="text-sm text-muted-foreground">veces</p>
               </CardContent>
             </Card>
@@ -263,8 +366,12 @@ export default function ProfilePage({ user, onLogout, onUpdateUser }) {
                 <CardTitle className="text-lg">Última donación</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-2xl font-bold text-accent">{lastDonationDate || 'N/A'}</p>
-                <p className="text-sm text-muted-foreground">{lastDonationDate ? 'registrada' : 'sin registros'}</p>
+                <p className="text-2xl font-bold text-accent">
+                  {lastDonationDate || "N/A"}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {lastDonationDate ? "registrada" : "sin registros"}
+                </p>
               </CardContent>
             </Card>
 
@@ -294,10 +401,14 @@ export default function ProfilePage({ user, onLogout, onUpdateUser }) {
                     key={badge.id}
                     className="flex flex-col items-center p-4 rounded-lg border-2 border-border hover:border-accent transition-colors"
                   >
-                    <div className={`w-16 h-16 ${badge.color} rounded-full flex items-center justify-center mb-2`}>
+                    <div
+                      className={`w-16 h-16 ${badge.color} rounded-full flex items-center justify-center mb-2`}
+                    >
                       <badge.icon className="w-8 h-8 text-white" />
                     </div>
-                    <p className="text-sm font-semibold text-center">{badge.name}</p>
+                    <p className="text-sm font-semibold text-center">
+                      {badge.name}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -315,25 +426,66 @@ export default function ProfilePage({ user, onLogout, onUpdateUser }) {
             <CardContent>
               <div className="space-y-4">
                 {userDonations.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">Aún no registraste donaciones. Agrega la más reciente aquí.</p>
+                  <p className="text-sm text-muted-foreground">
+                    Aún no registraste donaciones. Agrega la más reciente aquí.
+                  </p>
                 ) : (
                   userDonations.map((d, i) => (
                     <div key={i} className="p-3 border rounded">
-                      <div className="font-medium">{d.date} — {d.hospital}</div>
-                      <div className="text-sm text-muted-foreground">{d.units} unidades • {d.bloodType}</div>
+                      <div className="font-medium">
+                        {d.date} — {d.hospital}
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        {d.units} unidades • {d.bloodType}
+                      </div>
                     </div>
                   ))
                 )}
 
                 <div className="pt-4">
-                  <h4 className="font-semibold mb-2">Registrar nueva donación</h4>
+                  <h4 className="font-semibold mb-2">
+                    Registrar nueva donación
+                  </h4>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mb-2">
-                    <Input type="date" value={donationForm.date} onChange={(e) => setDonationForm({ ...donationForm, date: e.target.value })} />
-                    <Input placeholder="Hospital" value={donationForm.hospital} onChange={(e) => setDonationForm({ ...donationForm, hospital: e.target.value })} />
-                    <Input type="number" min={1} value={donationForm.units} onChange={(e) => setDonationForm({ ...donationForm, units: Number(e.target.value) })} />
+                    <Input
+                      type="date"
+                      value={donationForm.date}
+                      onChange={(e) =>
+                        setDonationForm({
+                          ...donationForm,
+                          date: e.target.value,
+                        })
+                      }
+                    />
+                    <Input
+                      placeholder="Hospital"
+                      value={donationForm.hospital}
+                      onChange={(e) =>
+                        setDonationForm({
+                          ...donationForm,
+                          hospital: e.target.value,
+                        })
+                      }
+                    />
+                    <Input
+                      type="number"
+                      min={1}
+                      value={donationForm.units}
+                      onChange={(e) =>
+                        setDonationForm({
+                          ...donationForm,
+                          units: Number(e.target.value),
+                        })
+                      }
+                    />
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-4">
-                    <Select value={donationForm.bloodType} onValueChange={(v) => setDonationForm({ ...donationForm, bloodType: v })}>
+                    <Select
+                      value={donationForm.bloodType}
+                      onValueChange={(v) =>
+                        setDonationForm({ ...donationForm, bloodType: v })
+                      }
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="Tipo de sangre" />
                       </SelectTrigger>
@@ -348,7 +500,9 @@ export default function ProfilePage({ user, onLogout, onUpdateUser }) {
                         <SelectItem value="O-">O-</SelectItem>
                       </SelectContent>
                     </Select>
-                    <Button onClick={addDonation} className="w-full">Registrar donación</Button>
+                    <Button onClick={addDonation} className="w-full">
+                      Registrar donación
+                    </Button>
                   </div>
                 </div>
               </div>

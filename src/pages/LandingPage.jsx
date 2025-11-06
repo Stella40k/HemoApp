@@ -1,3 +1,24 @@
+/**
+ * LandingPage.jsx - Página de inicio de HemoApp
+ *
+ * ¿Qué hace?
+ * - Presenta la aplicación a usuarios nuevos
+ * - Muestra información sobre el proceso de donación de sangre
+ * - Proporciona acceso a las funciones principales (donar/solicitar)
+ *
+ * ¿Para qué sirve?
+ * - Es la primera página que ven los visitantes no autenticados
+ * - Explica los beneficios y requisitos para donar sangre
+ * - Guía a los usuarios hacia el registro o solicitud de sangre
+ *
+ * Secciones principales:
+ * - Hero: Llamada a la acción principal
+ * - Servicios: Características de la plataforma
+ * - Requisitos: Información sobre cómo donar
+ * - FAQ: Preguntas frecuentes
+ * - Nosotros: Información de contacto
+ */
+
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import logo from "@/assets/logo.png";
@@ -5,19 +26,18 @@ import icono1 from "@/assets/icono-1.png";
 import icono2 from "@/assets/icono-2.png";
 import icono3 from "@/assets/icono-3.png";
 import icono4 from "@/assets/icono-4.png";
+import recurso7 from "@/assets/Recurso-7.png";
+import recurso8 from "@/assets/Recurso-8.png";
+import recurso9 from "@/assets/Recurso-9.png";
 
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-background">
-      {/* Navigation */}
+      {/* Barra de navegación principal */}
       <nav className="bg-card-foreground py-4 px-6 shadow-lg">
         <div className="container mx-auto flex justify-between items-center">
           <Link to="/" className="flex items-center gap-3">
-            <img
-              src={logo}
-              alt="HemoApp"
-              className="w-10 h-10 object-contain"
-            />
+            <img src={logo} alt="HemoApp" className="w-11 object-contain" />
             <span className="text-2xl font-bold text-primary-foreground">
               Hemo<span className="font-normal">App</span>
             </span>
@@ -44,7 +64,7 @@ export default function LandingPage() {
         </div>
       </nav>
 
-      {/* Hero Section */}
+      {/* Sección Hero - Presentación principal con gradiente */}
       <section className="bg-gradient-to-br from-primary via-accent to-primary py-20 px-6 relative overflow-hidden min-h-[600px]">
         <div className="absolute right-0 top-1/4 w-[500px] h-[500px] bg-secondary/40 rounded-full blur-3xl"></div>
         <div className="absolute right-20 top-1/2 w-[400px] h-[400px] bg-accent/30 rounded-full blur-3xl"></div>
@@ -58,41 +78,48 @@ export default function LandingPage() {
                 HemoApp es la plataforma que une donantes de sangre con
                 hospitales e instituciones de salud de manera rápida y segura.
               </p>
-              <div className="flex flex-wrap gap-4">
-                <Link to="/login">
-                  <Button
-                    size="lg"
-                    className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold px-8 py-6 text-lg shadow-xl rounded-full"
-                  >
-                    Quiero donar
-                  </Button>
-                </Link>
-                <Link to="/solicitar-sangre">
-                  <Button
-                    size="lg"
-                    className="bg-secondary hover:bg-secondary/90 text-secondary-foreground font-semibold px-8 py-6 text-lg rounded-full"
-                  >
-                    Necesito recibir una donación
-                  </Button>
-                </Link>
-              </div>
             </div>
-            <div className="text-primary-foreground/80 leading-relaxed text-lg">
-              Cada día, miles de personas necesitan sangre para cirugías,
-              emergencias y tratamientos. Sin embargo, la falta de donantes
-              disponibles sigue siendo un gran desafío.
+
+            <div className="flex flex-wrap gap-4">
+              <div className="text-primary-foreground/80 leading-relaxed text-lg">
+                Cada día, miles de personas necesitan sangre para cirugías,
+                emergencias y tratamientos. Sin embargo, la falta de donantes
+                disponibles sigue siendo un gran desafío.
+              </div>
+              <Link to="/login">
+                <Button
+                  size="lg"
+                  className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold px-8 py-6 text-lg shadow-xl rounded-full"
+                >
+                  Quiero donar
+                </Button>
+              </Link>
+              <Link to="/solicitar-sangre">
+                <Button
+                  size="lg"
+                  className="bg-popover-foreground hover:bg-secondary/90 text-primary-foreground font-semibold px-8 py-6 text-lg rounded-full"
+                >
+                  Necesito recibir una donación
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
       </section>
 
       {/* Features Section */}
-      <section id="servicios" className="py-16 px-6 bg-card-foreground">
+      <section
+        id="servicios"
+        className="py-16 px-6"
+        style={{
+          backgroundImage: `url(${recurso7}) !important`,
+        }}
+      >
         <div className="container mx-auto">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div className="grid grid-cols-2 gap-8">
               <div className="text-center">
-                <div className="w-40 h-40 mx-auto mb-4 rounded-full border-8 border-accent/80 bg-sidebar--secondary flex items-center justify-center shadow-lg">
+                <div className="w-40 h-40 mx-auto mb-4 rounded-full /80 flex items-center justify-center shadow-lg">
                   <img
                     src={icono1}
                     alt="Registro de donantes"
@@ -106,7 +133,7 @@ export default function LandingPage() {
                 </p>
               </div>
               <div className="text-center">
-                <div className="w-40 h-40 mx-auto mb-4 rounded-full border-8 border-accent/80 bg-sidebar--secondary flex items-center justify-center shadow-lg">
+                <div className="w-40 h-40 mx-auto mb-4 rounded-full /80 flex items-center justify-center shadow-lg">
                   <img
                     src={icono2}
                     alt="Solicitudes urgentes"
@@ -120,7 +147,7 @@ export default function LandingPage() {
                 </p>
               </div>
               <div className="text-center">
-                <div className="w-40 h-40 mx-auto mb-4 rounded-full border-8 border-accent/80 bg--secondary flex items-center justify-center shadow-lg">
+                <div className="w-40 h-40 mx-auto mb-4 rounded-full/80 flex items-center justify-center shadow-lg">
                   <img
                     src={icono3}
                     alt="Geolocalización"
@@ -134,7 +161,7 @@ export default function LandingPage() {
                 </p>
               </div>
               <div className="text-center">
-                <div className="w-40 h-40 mx-auto mb-4 rounded-full border-8 border-accent/80 bg--secondary flex items-center justify-center shadow-lg">
+                <div className="w-40 h-40 mx-auto mb-4 rounded-full/80 bg--secondary flex items-center justify-center shadow-lg">
                   <img
                     src={icono4}
                     alt="Notificaciones"
@@ -251,7 +278,7 @@ export default function LandingPage() {
       </section>
 
       {/* Contact / Nosotros Section */}
-      <section id="nosotros" className="py-16 px-6 bg-primary">
+      <section id="nosotros" className="py-16 px-6 bg-danger">
         <div className="container mx-auto max-w-4xl">
           <h2 className="text-4xl font-bold text-primary-foreground mb-4">
             Nosotros

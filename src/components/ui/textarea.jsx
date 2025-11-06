@@ -1,3 +1,22 @@
+/**
+ * textarea.jsx - Componente de área de texto multilínea
+ *
+ * ¿Qué hace?
+ * - Proporciona un campo de texto de múltiples líneas estilizado
+ * - Mantiene consistencia con el resto de inputs del sistema
+ *
+ * ¿Para qué sirve?
+ * - Comentarios, descripciones, notas largas
+ * - Cualquier input que requiera más de una línea
+ * - Formularios con campos de texto extenso
+ *
+ * Características:
+ * - Altura mínima de 80px (ajustable)
+ * - Redimensionable por el usuario
+ * - Estilos de focus para accesibilidad
+ * - Soporte para placeholder y estados disabled
+ */
+
 import * as React from "react";
 
 import { cn } from "@/lib/utils";

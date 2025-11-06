@@ -1,33 +1,68 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Heart } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useToast } from '@/hooks/use-toast';
-import PropTypes from 'prop-types';
+/**
+ * LoginPage.jsx - Página de inicio de sesión
+ *
+ * ¿Qué hace?
+ * - Permite a usuarios registrados acceder a la aplicación
+ * - Valida las credenciales del usuario contra localStorage
+ * - Redirige al dashboard después del login exitoso
+ *
+ * ¿Cómo funciona?
+ * - Compara el email y contraseña ingresados con los usuarios almacenados
+ * - Si las credenciales coinciden: llama a onLogin y navega al dashboard
+ * - Si no coinciden: muestra un mensaje de error
+ *
+ * Props:
+ * - onLogin: Función que actualiza el estado de autenticación en App.jsx
+ */
+
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Heart } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { useToast } from "@/hooks/use-toast";
+import PropTypes from "prop-types";
 
 export default function LoginPage({ onLogin }) {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const navigate = useNavigate();
-  const { toast } = useToast();
+  // Estados para almacenar los valores del formulario
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const navigate = useNavigate(); // Hook para navegación programática
+  const { toast } = useToast(); // Hook para mostrar notificaciones
 
+  /**
+   * handleSubmit - Maneja el envío del formulario de login
+   * ¿Qué hace?
+   * - Previene el comportamiento por defecto del formulario
+   * - Busca el usuario en localStorage
+   * - Valida las credenciales
+   * - Muestra mensajes de éxito o error
+   */
   const handleSubmit = (e) => {
     e.preventDefault();
-    
-    // Simulate login - check if user exists
-    const users = JSON.parse(localStorage.getItem('hemoapp_users') || '[]');
-    const user = users.find((u) => u.email === email && u.password === password);
-    
+
+    // Recupera todos los usuarios registrados del localStorage
+    const users = JSON.parse(localStorage.getItem("hemoapp_users") || "[]");
+    // Busca un usuario que coincida con el email y contraseña ingresados
+    const user = users.find(
+      (u) => u.email === email && u.password === password
+    );
+
     if (user) {
       onLogin(user);
       toast({
         title: "¡Bienvenido!",
         description: "Has iniciado sesión correctamente",
       });
-      navigate('/dashboard');
+      navigate("/dashboard");
     } else {
       toast({
         title: "Error",
@@ -44,7 +79,9 @@ export default function LoginPage({ onLogin }) {
           <div className="mx-auto mb-4 w-16 h-16 bg-primary rounded-full flex items-center justify-center">
             <Heart className="w-8 h-8 text-primary-foreground fill-primary-foreground" />
           </div>
-          <CardTitle className="text-3xl font-bold text-primary">Iniciar Sesión</CardTitle>
+          <CardTitle className="text-3xl font-bold text-primary">
+            Iniciar Sesión
+          </CardTitle>
           <CardDescription>Ingresa a tu cuenta de HemoApp</CardDescription>
         </CardHeader>
         <CardContent>
@@ -75,13 +112,21 @@ export default function LoginPage({ onLogin }) {
               Entrar
             </Button>
             <div className="text-center">
-              <Link to="#" className="text-sm text-muted-foreground hover:text-primary">
+              <Link
+                to="#"
+                className="text-sm text-muted-foreground hover:text-primary"
+              >
                 ¿Olvidaste tu contraseña?
               </Link>
             </div>
             <div className="text-center pt-4 border-t">
-              <span className="text-sm text-muted-foreground">¿No tienes cuenta? </span>
-              <Link to="/register" className="text-sm text-primary font-semibold hover:underline">
+              <span className="text-sm text-muted-foreground">
+                ¿No tienes cuenta?{" "}
+              </span>
+              <Link
+                to="/register"
+                className="text-sm text-primary font-semibold hover:underline"
+              >
                 Regístrate aquí
               </Link>
             </div>
@@ -93,5 +138,5 @@ export default function LoginPage({ onLogin }) {
 }
 
 LoginPage.propTypes = {
-  onLogin: PropTypes.func.isRequired
+  onLogin: PropTypes.func.isRequired,
 };
