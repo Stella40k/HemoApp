@@ -14,11 +14,11 @@ import {
 } from "../controller/institution.controller.js";
 
 const institutionRouter = express.Router();
-//publico
+//publico (mapa y busqueda)
 institutionRouter.get("/institutions/public", getPublicInstitutions);
 institutionRouter.get("/institutions/:id", getInstitutionById);
 institutionRouter.get("/institutions/search/suggestions", getSearchSuggestions);
-//protegidas
+//protegidas (instituciones)
 institutionRouter.get("/institutions/my-institution", authenticateToken, requireInstitution, getMyInstitution);
-institutionRouter.put("/institutions/my-institution",  authenticateToken, requireInstitution, updateInstitutionValidation, updateMyInstitution);
+institutionRouter.put("/institutions/my-institution", authenticateToken, requireInstitution, updateInstitutionValidation, updateMyInstitution);
 export default institutionRouter;

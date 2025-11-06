@@ -26,7 +26,7 @@ authRouter.post("/auth/register", authRateLimite, registerValidation, register);
 authRouter.post("/auth/login" , loginRateLimite, loginValidation, login);
 authRouter.get("/auth/verify-email/:token", verifyEmail);
 
-//rutas protegidas
+//rutas protegidas(requieren token)
 authRouter.get("/auth/me", authenticateToken, getMyProfile);
 authRouter.post("/auth/logout", authenticateToken, logout);
 authRouter.post("/auth/refresh-token", validateRefreshToken, refreshToken);
