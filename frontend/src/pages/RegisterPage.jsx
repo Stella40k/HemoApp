@@ -3,7 +3,6 @@
  * * Alineación con Backend (Registro Mínimo - Datos Médicos van en Onboarding):
  * - Envía los campos userName, email, password (Nivel superior).
  * - Envía los campos profileData: {firstName, lastName, dni, birthDate, gender} (Anidados).
- * - Se eliminaron los campos bloodType, factor, y weight del registro inicial.
  */
 
 import { useState } from "react";
@@ -28,7 +27,11 @@ import {
 } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 
+
 export default function RegisterPage({ onRegister }) {
+  // ⬅️ CAMBIO 1: Añadir estado de carga
+  const [isLoading, setIsLoading] = useState(false); 
+  
   // ⬅️ ESTADO MÍNIMO REQUERIDO PARA EL REGISTRO INICIAL 💥
   const [formData, setFormData] = useState({
     // Nivel superior
@@ -50,14 +53,19 @@ export default function RegisterPage({ onRegister }) {
   /**
    * handleSubmit - Procesa el registro del nuevo usuario
    */
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => { // ⬅️ CAMBIO 2: Función async
     e.preventDefault();
+    setIsLoading(true);
 
-    // ⬅️ PAYLOAD MÍNIMO ALINEADO AL BACKEND 💥
+    // URL DEL ENDPOINT (Ajusta el puerto si es diferente a 3001)
+    const API_URL = "http://localhost:3001/api/auth/register";
+
+    // ⬅️ PAYLOAD ALINEADO AL BACKEND 💥
     const payload = {
         userName: formData.userName,
         email: formData.email,
         password: formData.password,
+        role: formData.role, // "donador", "institucion", etc.
         
         profileData: { // OBJETO ANIDADO REQUERIDO
             firstName: formData.firstName,
@@ -65,42 +73,55 @@ export default function RegisterPage({ onRegister }) {
             dni: formData.dni,
             birthDate: formData.birthDate,
             gender: formData.gender,
-            // Se eliminan: bloodType y factor
         },
+        // Si el rol fuera 'institucion', aquí se añadiría 'institutionData'
     };
 
-    // --- SIMULACIÓN DE GUARDADO (Backend Simulado) ---
-    const users = JSON.parse(localStorage.getItem("hemoapp_users") || "[]");
-    
-    // Check de unicidad simulado
-    if (users.some(u => u.userName === payload.userName || u.email === payload.email || u.profileData.dni === payload.profileData.dni)) {
+    // --- CONEXIÓN AL BACKEND (Implementación de fetch con try/catch/finally) ---
+    try {
+      const response = await fetch(API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        const isInstitution = data.data.role === 'institucion';
+
         toast({
-            title: "Error",
-            description: "Usuario, DNI o Email ya existe.",
+          title: "¡Registro exitoso!", 
+          description: isInstitution
+          ? "Institución en validación. Te notificaremos al ser aprobada."
+          : "Hemos enviado un link de verificación a tu email."
+        });
+        
+        // Redirigir a login para que el usuario complete el flujo de verificación/espera
+        navigate("/login");
+        
+      } else {
+        // El backend maneja validaciones y errores (ej. email ya existe)
+        const errorMessage = data.msg || "Error desconocido al registrar.";
+
+        toast({
+          title: "Error",
+          description: errorMessage, 
+          variant: "destructive", 
+        });
+      }
+    } catch (error) {
+        console.error("Error de conexión:", error);
+        toast({
+            title: "Error de red",
+            description: "No se pudo conectar con el servidor.",
             variant: "destructive",
         });
-        return;
+    } finally {
+      setIsLoading(false);
     }
-
-    const newUser = {
-        id: Date.now().toString(), 
-        ...payload,
-        profileData: payload.profileData, 
-        donationStatus: "inactive",
-        accountStatus: "unverified",
-    };
-    
-    users.push(newUser);
-    localStorage.setItem("hemoapp_users", JSON.stringify(users));
-
-    // Autentica automáticamente (llama a onRegister)
-    onRegister(newUser); 
-    toast({
-      title: "¡Registro exitoso!",
-      description: "Serás redirigido al cuestionario inicial.",
-    });
-    // Redirigir al dashboard simulado (cambiar a /onboarding cuando esté listo)
-    navigate("/dashboard"); 
   };
 
 
@@ -237,31 +258,39 @@ export default function RegisterPage({ onRegister }) {
             </div>
             
             <div className="space-y-2">
-    <Label htmlFor="role">Tipo de Usuario</Label>
-    <Select
-        value={formData.role}
-        onValueChange={(value) => setFormData({ ...formData, role: value })}
-        >
-        <SelectTrigger>
-            <SelectValue placeholder="Selecciona tu rol" />
-        </SelectTrigger>
-        <SelectContent>
-            <SelectItem value="donor">Donante</SelectItem>
-            <SelectItem value="patient">Paciente</SelectItem>
-            <SelectItem value="community_member">Comunidad (No donante)</SelectItem>
-            <SelectItem value="institution">Institución</SelectItem>
-            <SelectItem value="moderator">Moderador</SelectItem>
-        </SelectContent>
-    </Select>
-      </div>
-</div>
+                <Label htmlFor="role">Tipo de Usuario</Label>
+                <Select
+                    value={formData.role}
+                    onValueChange={(value) => setFormData({ ...formData, role: value })}
+                    >
+                    <SelectTrigger>
+                        <SelectValue placeholder="Selecciona tu rol" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {/* Valores alineados a tu esquema del backend (user.model.js) */}
+                        <SelectItem value="donador">Donante</SelectItem>
+                        <SelectItem value="community_member">Comunidad (No donante)</SelectItem>
+                        <SelectItem value="institucion">Institución</SelectItem>
+                        <SelectItem value="moderador">Moderador</SelectItem>
+                    </SelectContent>
+                </Select>
+            </div>
+            </div>
             
             <Button
               type="submit"
               className="w-full bg-accent hover:bg-accent/90"
               size="lg"
+              disabled={isLoading} // ⬅️ CAMBIO 3: Deshabilita mientras carga
             >
-              Crear Cuenta
+              {isLoading ? ( // ⬅️ CAMBIO 4: Muestra el spinner si está cargando
+                <>
+                  <i className="fas fa-spinner fa-spin mr-2"></i>
+                  Registrando...
+                </>
+              ) : (
+              "Crear Cuenta"
+              )}
             </Button>
             <div className="text-center pt-4 border-t">
               <span className="text-base text-muted-foreground">
