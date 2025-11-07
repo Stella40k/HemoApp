@@ -1,9 +1,9 @@
 /**
  * RegisterPage.jsx - Página de registro de nuevos usuarios
- * * Alineación con Backend:
+ * * Alineación con Backend (Registro Mínimo - Datos Médicos van en Onboarding):
  * - Envía los campos userName, email, password (Nivel superior).
- * - Envía los campos profileData: {firstName, lastName, dni, birthDate, gender, bloodType, factor} (Anidados).
- * - Se eliminó la lógica de donaciones previas que no es parte del registro inicial del backend.
+ * - Envía los campos profileData: {firstName, lastName, dni, birthDate, gender} (Anidados).
+ * - Se eliminaron los campos bloodType, factor, y weight del registro inicial.
  */
 
 import { useState } from "react";
@@ -27,27 +27,22 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-// import PropTypes from "prop-types"; // Se puede eliminar si no se usa
 
 export default function RegisterPage({ onRegister }) {
-  // ⬅️ CORRECCIÓN 1: ÚNICA DECLARACIÓN DE ESTADO CON CAMPOS REQUERIDOS 💥
+  // ⬅️ ESTADO MÍNIMO REQUERIDO PARA EL REGISTRO INICIAL 💥
   const [formData, setFormData] = useState({
-    // CAMPOS DE NIVEL SUPERIOR
-    userName: "", // ⬅️ AGREGADO (Requerido)
+    // Nivel superior
+    userName: "", 
     email: "",
     password: "",
-    // CAMPOS ANIDADOS (profileData)
+    // profileData fields (anidados)
     firstName: "",
     lastName: "",
-    dni: "", // ⬅️ AGREGADO (Requerido)
-    birthDate: "", // ⬅️ AGREGADO (Requerido)
-    bloodType: "",
-    factor: "", // ⬅️ AGREGADO (Requerido por bloodType en el modelo)
-    gender: "", // ⬅️ RENOMBRADO (Era 'status')
-    // weight se mantiene aunque no sea crítico para el registro inicial
-    weight: "", 
+    dni: "", 
+    birthDate: "", 
+    gender: "",
+    role:"",
   });
-  // Se elimina toda la lógica de 'donations', 'showDonationForm', y 'donationEntry'
   
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -58,7 +53,7 @@ export default function RegisterPage({ onRegister }) {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // ⬅️ CORRECCIÓN 2: ESTRUCTURA DEL PAYLOAD ALINEADA AL BACKEND 💥
+    // ⬅️ PAYLOAD MÍNIMO ALINEADO AL BACKEND 💥
     const payload = {
         userName: formData.userName,
         email: formData.email,
@@ -70,17 +65,14 @@ export default function RegisterPage({ onRegister }) {
             dni: formData.dni,
             birthDate: formData.birthDate,
             gender: formData.gender,
-            bloodType: formData.bloodType,
-            factor: formData.factor,
+            // Se eliminan: bloodType y factor
         },
-        // weight no se incluye en profileData por ahora, ya que va a medicalProfile
-        // y el controlador actual no lo mapea en el registro, pero el modelo lo acepta después.
     };
 
     // --- SIMULACIÓN DE GUARDADO (Backend Simulado) ---
     const users = JSON.parse(localStorage.getItem("hemoapp_users") || "[]");
     
-    // Check de unicidad simulado (básico)
+    // Check de unicidad simulado
     if (users.some(u => u.userName === payload.userName || u.email === payload.email || u.profileData.dni === payload.profileData.dni)) {
         toast({
             title: "Error",
@@ -95,7 +87,7 @@ export default function RegisterPage({ onRegister }) {
         ...payload,
         profileData: payload.profileData, 
         donationStatus: "inactive",
-        accountStatus: "unverified", // Coherente con el backend
+        accountStatus: "unverified",
     };
     
     users.push(newUser);
@@ -105,16 +97,16 @@ export default function RegisterPage({ onRegister }) {
     onRegister(newUser); 
     toast({
       title: "¡Registro exitoso!",
-      description: "Por favor, verifica tu email para activar la cuenta.",
+      description: "Serás redirigido al cuestionario inicial.",
     });
-    // El backend redirige a ONBOARDING, pero por ahora vamos al dashboard simulado
+    // Redirigir al dashboard simulado (cambiar a /onboarding cuando esté listo)
     navigate("/dashboard"); 
   };
 
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-muted via-background to-muted flex items-center justify-center p-6">
-      <Card className="w-full max-w-md">
+      <Card className="w-full max-w-2xl">
         <CardHeader className="text-center">
           <div className="mx-auto mb-4 w-16 h-16 bg-accent rounded-full flex items-center justify-center">
             <UserPlus className="w-8 h-8 text-accent-foreground" />
@@ -127,7 +119,7 @@ export default function RegisterPage({ onRegister }) {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             
-            {/* ⬅️ CAMPO NUEVO: USERNAME 💥 */}
+            {/* ⬅️ CAMPO REQUERIDO: USERNAME 💥 */}
             <div className="space-y-2">
                 <Label htmlFor="userName">Nombre de Usuario</Label>
                 <Input
@@ -167,7 +159,7 @@ export default function RegisterPage({ onRegister }) {
               </div>
             </div>
 
-            {/* DNI y FECHA DE NACIMIENTO (Nuevos, Requeridos) 💥 */}
+            {/* DNI y FECHA DE NACIMIENTO (Requeridos) 💥 */}
             <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                     <Label htmlFor="dni">DNI</Label>
@@ -185,7 +177,7 @@ export default function RegisterPage({ onRegister }) {
                     <Label htmlFor="birthDate">Fecha de Nacimiento</Label>
                     <Input
                         id="birthDate"
-                        type="date" // Usamos type date para el selector
+                        type="date"
                         required
                         value={formData.birthDate}
                         onChange={(e) => setFormData({ ...formData, birthDate: e.target.value })}
@@ -194,7 +186,8 @@ export default function RegisterPage({ onRegister }) {
             </div>
 
             {/* EMAIL y CONTRASEÑA */}
-            <div className="space-y-2">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
@@ -204,7 +197,7 @@ export default function RegisterPage({ onRegister }) {
                 onChange={(e) =>
                   setFormData({ ...formData, email: e.target.value })
                 }
-              />
+                />
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Contraseña</Label>
@@ -212,72 +205,17 @@ export default function RegisterPage({ onRegister }) {
                 id="password"
                 type="password"
                 required
-                minLength={6} // Min 6 requerido por el backend
+                minLength={6} 
                 value={formData.password}
                 onChange={(e) =>
                   setFormData({ ...formData, password: e.target.value })
                 }
-              />
+                />
+                </div>
             </div>
             
-            {/* TIPO DE SANGRE, FACTOR, PESO (Nuevos/Corregidos) 💥 */}
-            <div className="grid grid-cols-3 gap-4">
-                <div className="space-y-2">
-                    <Label htmlFor="bloodType">Tipo de Sangre</Label>
-                    <Select
-                      value={formData.bloodType}
-                      onValueChange={(value) =>
-                        setFormData({ ...formData, bloodType: value })
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecciona" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="A+">A+</SelectItem>
-                        <SelectItem value="A-">A-</SelectItem>
-                        <SelectItem value="B+">B+</SelectItem>
-                        <SelectItem value="B-">B-</SelectItem>
-                        <SelectItem value="AB+">AB+</SelectItem>
-                        <SelectItem value="AB-">AB-</SelectItem>
-                        <SelectItem value="O+">O+</SelectItem>
-                        <SelectItem value="O-">O-</SelectItem>
-                      </SelectContent>
-                    </Select>
-                </div>
-                
-                {/* CAMPO FACTOR (Nuevo) */}
-                <div className="space-y-2">
-                    <Label htmlFor="factor">Factor</Label>
-                    <Select
-                        value={formData.factor}
-                        onValueChange={(value) => setFormData({ ...formData, factor: value })}
-                    >
-                        <SelectTrigger>
-                            <SelectValue placeholder="Factor" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="positive">Positivo (+)</SelectItem>
-                            <SelectItem value="negative">Negativo (-)</SelectItem>
-                        </SelectContent>
-                    </Select>
-                </div>
-
-                {/* PESO (medicalProfile) */}
-                <div className="space-y-2">
-                    <Label htmlFor="weight">Peso (kg)</Label>
-                    <Input
-                        id="weight"
-                        type="number"
-                        min={30}
-                        required
-                        value={formData.weight}
-                        onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
-                    />
-                </div>
-            </div>
-
             {/* GÉNERO (RENOMBRADO de 'status') 💥 */}
+            <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
                 <Label htmlFor="gender">Género</Label>
                 <Select
@@ -294,8 +232,26 @@ export default function RegisterPage({ onRegister }) {
                     </SelectContent>
                 </Select>
             </div>
-
-            {/* SE ELIMINA el bloque de Donaciones Previas (Optional: add past donations) */}
+            
+            <div className="space-y-2">
+    <Label htmlFor="role">Tipo de Usuario</Label>
+    <Select
+        value={formData.role}
+        onValueChange={(value) => setFormData({ ...formData, role: value })}
+        >
+        <SelectTrigger>
+            <SelectValue placeholder="Selecciona tu rol" />
+        </SelectTrigger>
+        <SelectContent>
+            <SelectItem value="donor">Donante</SelectItem>
+            <SelectItem value="patient">Paciente</SelectItem>
+            <SelectItem value="community_member">Comunidad (No donante)</SelectItem>
+            <SelectItem value="institution">Institución</SelectItem>
+            <SelectItem value="moderator">Moderador</SelectItem>
+        </SelectContent>
+    </Select>
+      </div>
+</div>
             
             <Button
               type="submit"
