@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import PropTypes from "prop-types";
+import logo from "@/assets/logo.png";
 
 export default function LoginPage({ onLogin }) {
   // Estados para almacenar los valores del formulario
@@ -73,16 +74,19 @@ export default function LoginPage({ onLogin }) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-muted via-background to-muted flex items-center justify-center p-6">
-      <Card className="w-full max-w-md">
+    <div className="min-h-screen bg-gradient-to-b from-card-foreground to-primary flex items-center justify-center p-6 relative overflow-hidden">
+      <div className="absolute left-0 w-[400px] h-[400px] bg-background/40 rounded-full blur-3xl"></div>
+      <div className="absolute left-0 top-2/4 w-[400px] h-[400px] bg-accent/40 rounded-full blur-3xl"></div>
+      <div className="absolute right-20 top-1/2 w-[300px] h-[300px] bg-background/30 rounded-full blur-3xl"></div>
+      <Card className="w-full max-w-md relative z-10">
         <CardHeader className="text-center">
-          <div className="mx-auto mb-4 w-16 h-16 bg-primary rounded-full flex items-center justify-center">
-            <Heart className="w-8 h-8 text-primary-foreground fill-primary-foreground" />
+          <div className="mx-auto mb-4 w-24 h-24 bg-background rounded-full flex items-center justify-center">
+            <img src={logo} alt="Marca  HemoApp" className="w-16 h-auto object-contain"/>
           </div>
           <CardTitle className="text-3xl font-bold text-primary">
             Iniciar Sesión
           </CardTitle>
-          <CardDescription>Ingresa a tu cuenta de HemoApp</CardDescription>
+          <CardDescription className="text-lg font-semibold" >Ingresa a tu cuenta de HemoApp</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -114,18 +118,18 @@ export default function LoginPage({ onLogin }) {
             <div className="text-center">
               <Link
                 to="#"
-                className="text-sm text-muted-foreground hover:text-primary"
+                className="text-base text-muted-foreground hover:text-primary"
               >
                 ¿Olvidaste tu contraseña?
               </Link>
             </div>
             <div className="text-center pt-4 border-t">
-              <span className="text-sm text-muted-foreground">
+              <span className="text-base text-muted-foreground">
                 ¿No tienes cuenta?{" "}
               </span>
               <Link
                 to="/register"
-                className="text-sm text-primary font-semibold hover:underline"
+                className="text-base text-primary font-semibold hover:underline"
               >
                 Regístrate aquí
               </Link>

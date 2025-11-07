@@ -101,34 +101,36 @@ export default function LandingPage() {
               <h1 className="text-5xl md:text-6xl font-bold text-primary-foreground leading-tight mb-6 uppercase">
                 CONECTAMOS CON QUIENES MÁS LO NECESITAN
               </h1>
-              <p className="text-xl text-primary-foreground/90 mb-8 leading-relaxed">
+              <p className="text-2xl font-semibold text-primary-foreground/90 mb-8 leading-relaxed">
                 HemoApp es la plataforma que une donantes de sangre con
                 hospitales e instituciones de salud de manera rápida y segura.
               </p>
             </div>
 
             <div className="flex flex-wrap gap-4">
-              <div className="text-primary-foreground/80 leading-relaxed text-lg">
+              <div className="text-primary-foreground/80 leading-relaxed text-xl font-bold">
                 Cada día, miles de personas necesitan sangre para cirugías,
                 emergencias y tratamientos. Sin embargo, la falta de donantes
                 disponibles sigue siendo un gran desafío.
               </div>
+              <div className="flex flex-wrap gap-4 mt-10">
               <Link to="/login">
                 <Button
                   size="lg"
-                  className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold px-8 py-6 text-lg shadow-xl rounded-full"
-                >
+                  className="bg-accent hover:bg-foreground/90 text-accent-foreground font-semibold px-8 py-6 text-lg shadow-xl rounded-full"
+                  >
                   Quiero donar
                 </Button>
               </Link>
               <Link to="/solicitar-sangre">
                 <Button
                   size="lg"
-                  className="bg-popover-foreground hover:bg-secondary/90 text-primary-foreground font-semibold px-8 py-6 text-lg rounded-full"
-                >
+                  className="bg-popover-foreground hover:bg-accent/90 text-primary-foreground font-semibold px-8 py-6 text-lg rounded-full"
+                  >
                   Necesito recibir una donación
                 </Button>
               </Link>
+                    </div>
             </div>
           </div>
         </div>
@@ -137,63 +139,64 @@ export default function LandingPage() {
       {/* Features Section */}
       <section
         id="servicios"
-        className="py-16 px-6" style={{
-        backgroundColor: 'hsl(341 64% 35%)' // El valor HSL directo de tu marca
-    }}>
-        <div className="container mx-auto">
+        className="py-16 px-6 bg-primary relative overflow-hidden">
+          <div className="absolute right-0 top w-[500px] h-[500px] bg-accent/40 rounded-full blur-3xl"></div>
+    <div className="absolute left-20 top w-[300px] h-[300px] bg-secondary/30 rounded-full blur-3xl"></div>
+    <div className="absolute left top-2/4 w-[300px] h-[300px] bg-card-foreground/30 rounded-full blur-3xl"></div>
+        <div className="container mx-auto relative z-10">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div className="grid grid-cols-2 gap-8">
               <div className="text-center">
-                <div className="w-40 h-40 mx-auto mb-4 rounded-full /80 flex items-center justify-center shadow-lg">
+                <div className="w-40 h-40 mx-auto mb-4 rounded-full /80 flex items-center justify-center">
                   <img
                     src={icono1}
                     alt="Registro de donantes"
                     className="w-45 object-contain"
                   />
                 </div>
-                <p className="text-sm font-bold text-primary-foreground">
+                <p className="text-xl font-bold text-primary-foreground">
                   Registro de donantes
                   <br />
                   voluntarios
                 </p>
               </div>
               <div className="text-center">
-                <div className="w-40 h-40 mx-auto mb-4 rounded-full /80 flex items-center justify-center shadow-lg">
+                <div className="w-40 h-40 mx-auto mb-4 rounded-full /80 flex items-center justify-center">
                   <img
                     src={icono2}
                     alt="Solicitudes urgentes"
                     className="w-45 object-contain"
                   />
                 </div>
-                <p className="text-sm font-bold text-primary-foreground">
+                <p className="text-xl font-bold text-primary-foreground">
                   Solicitudes urgentes de
                   <br />
                   sangre en tiempo real
                 </p>
               </div>
               <div className="text-center">
-                <div className="w-40 h-40 mx-auto mb-4 rounded-full/80 flex items-center justify-center shadow-lg">
+                <div className="w-40 h-40 mx-auto mb-4 rounded-full/80 flex items-center justify-center">
                   <img
                     src={icono3}
                     alt="Geolocalización"
                     className="w-45 object-contain"
                   />
                 </div>
-                <p className="text-sm font-bold text-primary-foreground">
+                <p className="text-xl font-bold text-primary-foreground">
                   Geolocalización de
                   <br />
                   instituciones cercanas
                 </p>
               </div>
               <div className="text-center">
-                <div className="w-40 h-40 mx-auto mb-4 rounded-full/80 bg--secondary flex items-center justify-center shadow-lg">
+                <div className="w-40 h-40 mx-auto mb-4 rounded-full/80  flex items-center justify-center">
                   <img
                     src={icono4}
                     alt="Notificaciones"
                     className="w-45 object-contain"
                   />
                 </div>
-                <p className="text-sm font-bold text-primary-foreground">
+                <p className="text-xl font-bold text-primary-foreground">
                   Notificaciones y<br />
                   recordatorios
                   <br />
@@ -231,19 +234,19 @@ export default function LandingPage() {
             <ul className="space-y-4 text-primary-foreground">
                 <li className="flex items-start gap-3">
                     <span className="text-white text-xl font-bold">✓</span>
-                    <span>Tener entre 18 y 65 años</span>
+                    <span className="text-white text-2xl">Tener entre 18 y 65 años</span>
                 </li>
                 <li className="flex items-start gap-3">
                     <span className="text-white text-xl font-bold">✓</span>
-                    <span>Pesar más de 50 kg</span>
+                    <span className="text-white text-2xl">Pesar más de 50 kg</span>
                 </li>
                 <li className="flex items-start gap-3">
                     <span className="text-white text-xl font-bold">✓</span>
-                    <span>Estar en buen estado de salud</span>
+                    <span className="text-white text-2xl">Estar en buen estado de salud</span>
                 </li>
                 <li className="flex items-start gap-3">
                     <span className="text-white text-xl font-bold">✓</span>
-                    <span>No haber donado en los últimos 3 meses</span>
+                    <span className="text-white text-2xl">No haber donado en los últimos 3 meses</span>
                 </li>
             </ul>
         </div>
@@ -256,19 +259,19 @@ export default function LandingPage() {
             <ul className="space-y-4 text-primary-foreground">
                 <li className="flex items-start gap-3">
                     <span className="text-white text-xl font-bold">✗</span>
-                    <span>Tienes tatuajes o piercings recientes (menos de 12 meses)</span>
+                    <span className="text-white text-2xl">Tienes tatuajes o piercings recientes (menos de 12 meses)</span>
                 </li>
                 <li className="flex items-start gap-3">
                     <span className="text-white text-xl font-bold">✗</span>
-                    <span>Has tenido fiebre o infecciones en las últimas 2 semanas</span>
+                    <span className="text-white text-2xl">Has tenido fiebre o infecciones en las últimas 2 semanas</span>
                 </li>
                 <li className="flex items-start gap-3">
                     <span className="text-white text-xl font-bold">✗</span>
-                    <span>Estás embarazada o amamantando</span>
+                    <span className="text-white text-2xl">Estás embarazada o amamantando</span>
                 </li>
                 <li className="flex items-start gap-3">
                     <span className="text-white text-xl font-bold">✗</span>
-                    <span>Has tenido cirugías recientes</span>
+                    <span className="text-white text-2xl">Has tenido cirugías recientes</span>
                 </li>
             </ul>
         </div>
@@ -328,7 +331,7 @@ export default function LandingPage() {
             Quiénes somos
           </h2>
           <p className="text-xl text-primary-foreground/90 mb-4">
-          Somos dos estudiantes de la Tecnicatura Superior de Desarrollo de Software, 
+          Somos dos estudiantes de la Tecnicatura Superior de Desarrollo de Software Multiplataforma, 
       comprometidos con minimizar la brecha crítica entre donantes, pacientes 
       e instituciones de hemoterapia.
           </p>
