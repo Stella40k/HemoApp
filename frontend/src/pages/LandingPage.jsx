@@ -335,7 +335,7 @@ export default function LandingPage() {
          </div>
          <div className="md:w-1/4 flex justify-end items-center gap-4">
           <img src={instimarca} alt="Marca IPF" className="w-28 object-contain"/>
-          <img src={carreramarca} alt="marca de la carrera" className="w-32 object-contain"/>
+          <img src={carreramarca} alt="marca de la carrera" className="w-40 object-contain"/>
             </div>
          </div>
          </div>
