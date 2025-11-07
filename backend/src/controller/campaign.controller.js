@@ -1,4 +1,4 @@
-import {CampingModel} from "../models/campaign.model.js"
+import {CampaignModel} from "../models/campaign.model.js"
 import { userModel } from "../models/user.model.js"
 import { InstitutionModel } from "../models/institution.model.js";
 export const createCampaign = async (req, res)=>{
@@ -27,11 +27,11 @@ export const getCampaignsNear = async (req, res)=>{
         const { lat, lng, maxDistance = 10000 } = req.query; //maxima distancia en metros(10km)
         if (!lat || !lng) {
             // Si no hay ubicación, solo devuelve campañas activas sin ordenar por distancia
-            const activeCampaigns = await CampingModel.find({ endDate: { $gte: new Date() } });
+            const activeCampaigns = await CampaignModel.find({ endDate: { $gte: new Date() } });
             return res.status(200).json({ ok: true, data: activeCampaigns });
         }
 
-        const campaigns = await CampingModel.find({
+        const campaigns = await CampaignModel.find({
             location: {
                 $nearSphere: { // Utiliza GeoJSON para eficiencia
                     $geometry: {
