@@ -1,9 +1,5 @@
 /**
- * RegisterPage.jsx - Página de registro de nuevos usuarios
- * * Alineación con Backend (Registro Mínimo - Datos Médicos van en Onboarding):
- * - Envía los campos userName, email, password (Nivel superior).
- * - Envía los campos profileData: {firstName, lastName, dni, birthDate, gender} (Anidados).
- * - Se eliminaron los campos bloodType, factor, y weight del registro inicial.
+ * RegisterPage.jsx - Página de registro de nuevos usuarios (Simulación Local)
  */
 
 import { useState } from "react";
@@ -29,7 +25,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 
 export default function RegisterPage({ onRegister }) {
-  // ⬅️ ESTADO MÍNIMO REQUERIDO PARA EL REGISTRO INICIAL 💥
+  // Estado del formulario
   const [formData, setFormData] = useState({
     // Nivel superior
     userName: "", 
@@ -48,16 +44,16 @@ export default function RegisterPage({ onRegister }) {
   const { toast } = useToast();
 
   /**
-   * handleSubmit - Procesa el registro del nuevo usuario
+   * handleSubmit - Procesa el registro simulado
    */
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // ⬅️ PAYLOAD MÍNIMO ALINEADO AL BACKEND 💥
     const payload = {
         userName: formData.userName,
         email: formData.email,
         password: formData.password,
+        role: formData.role, 
         
         profileData: { // OBJETO ANIDADO REQUERIDO
             firstName: formData.firstName,
@@ -65,15 +61,14 @@ export default function RegisterPage({ onRegister }) {
             dni: formData.dni,
             birthDate: formData.birthDate,
             gender: formData.gender,
-            // Se eliminan: bloodType y factor
         },
     };
 
-    // --- SIMULACIÓN DE GUARDADO (Backend Simulado) ---
+    // --- SIMULACIÓN DE BACKEND (con localStorage) ---
     const users = JSON.parse(localStorage.getItem("hemoapp_users") || "[]");
     
-    // Check de unicidad simulado
-    if (users.some(u => u.userName === payload.userName || u.email === payload.email || u.profileData.dni === payload.profileData.dni)) {
+    // Check de unicidad simulado (usuario, email, dni)
+    if (users.some(u => u.userName === payload.userName || u.email === payload.email || (u.profileData && u.profileData.dni === payload.profileData.dni))) {
         toast({
             title: "Error",
             description: "Usuario, DNI o Email ya existe.",
@@ -82,24 +77,32 @@ export default function RegisterPage({ onRegister }) {
         return;
     }
 
+    // Creación del nuevo usuario simulado
     const newUser = {
         id: Date.now().toString(), 
         ...payload,
         profileData: payload.profileData, 
         donationStatus: "inactive",
         accountStatus: "unverified",
+        // En una simulación, debes simular el token para que el Dashboard funcione
+        // Nota: En la versión real, el login posterior proveería el token.
+        accessToken: "simulated_token_123", 
     };
     
+    // Guardar en localStorage
     users.push(newUser);
     localStorage.setItem("hemoapp_users", JSON.stringify(users));
-
-    // Autentica automáticamente (llama a onRegister)
+    
+    // ⚠️ Importante: En la simulación, debes llamar a onRegister para guardar el usuario
+    // en el estado global de la App, lo que simula un inicio de sesión.
     onRegister(newUser); 
+
     toast({
       title: "¡Registro exitoso!",
-      description: "Serás redirigido al cuestionario inicial.",
+      description: "Serás redirigido al panel principal.",
     });
-    // Redirigir al dashboard simulado (cambiar a /onboarding cuando esté listo)
+    
+    // ✅ REDIRECCIÓN FINAL AL DASHBOARD
     navigate("/dashboard"); 
   };
 
@@ -217,7 +220,7 @@ export default function RegisterPage({ onRegister }) {
                 </div>
             </div>
             
-            {/* GÉNERO (RENOMBRADO de 'status') 💥 */}
+            {/* GÉNERO y ROL */}
             <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
                 <Label htmlFor="gender">Género</Label>
@@ -246,11 +249,11 @@ export default function RegisterPage({ onRegister }) {
             <SelectValue placeholder="Selecciona tu rol" />
         </SelectTrigger>
         <SelectContent>
-            <SelectItem value="donor">Donante</SelectItem>
-            <SelectItem value="patient">Paciente</SelectItem>
+            {/* VALORES ALINEADOS A user.model.js */}
+            <SelectItem value="donador">Donante</SelectItem>
             <SelectItem value="community_member">Comunidad (No donante)</SelectItem>
-            <SelectItem value="institution">Institución</SelectItem>
-            <SelectItem value="moderator">Moderador</SelectItem>
+            <SelectItem value="institucion">Institución</SelectItem>
+            <SelectItem value="moderador">Moderador</SelectItem>
         </SelectContent>
     </Select>
       </div>

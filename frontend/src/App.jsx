@@ -31,6 +31,7 @@ import ProfilePage from "./pages/ProfilePage";
 import DonorStatusPage from "./pages/DonorStatusPage";
 import RequestBloodPage from "./pages/RequestBloodPage";
 import { Toaster } from "./components/ui/toaster";
+import OnboardingPage from "./pages/OnboardingPage"; // ⬅️ AÑADIDO: IMPORTACIÓN FALTANTE
 
 export default function App() {
   // Estado para controlar si el usuario está autenticado
@@ -205,6 +206,23 @@ export default function App() {
             )
           }
         />
+        
+        {/* ⬅️ RUTA PROTEGIDA PARA ONBOARDING */}
+        <Route
+          path="/onboarding"
+          element={
+            isAuthenticated ? (
+              <OnboardingPage
+                user={user}
+                onLogout={handleLogout}
+                onUpdateUser={handleUpdateUser}
+              />
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />
+        
       </Routes>
       <Toaster />
     </Router>
