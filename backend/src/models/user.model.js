@@ -74,14 +74,14 @@ const userSchema = new Schema({
             minlength: 2,
             maxlength: 50,
             trim: true,
-            required: true
+            required: false
         },
         lastName:{
             type: String,
             minlength: 2,
             maxlength: 60,
             trim: true,
-            required: true
+            required: false
         },
         dni:{
             type: String,
@@ -90,7 +90,7 @@ const userSchema = new Schema({
         },
         birthDate:{
             type: Date,
-            required: true
+            required: false
         },
         gender:{
             type: String,

@@ -1,7 +1,6 @@
 import express from "express";
 import { authenticateToken } from "../middlewares/auth.middleware.js";
 import { 
-    createInstitutionValidation, 
     updateInstitutionValidation 
 } from "../middlewares/validations/institution.validation.js";
 import {
