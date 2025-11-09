@@ -89,13 +89,13 @@ export const login = async (req, res) => {
         msg: "Cuenta no verificada. Por favor verifica tu email o espera la aprobación del moderador.",
       });
     }
-    const accessToken = generateToken(user);
+    const Token = generateToken(user);
     //parte para la auditoria
     user.lastLogin = new Date();
     user.loginCount += 1;
-    user.Token = accessToken;
+    user.Token = Token;
     await user.save();
-    res.cookie("accessToken", accessToken, {
+    res.cookie("accessToken", Token, {
       httpOnly: true,
       secure: envs.NODE_ENV === "production",
       sameSite: "strict",
@@ -105,7 +105,6 @@ export const login = async (req, res) => {
       ok: true,
       msg: "Logueado correctamente, bienvenido!",
       data: {
-        accessToken,
         user: {
           id: user._id,
           email: user.email,
