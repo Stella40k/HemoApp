@@ -35,25 +35,25 @@ export default function Header({ user, onLogout }) {
   };
 
   return (
-    <header className="bg-primary py-4 px-6 shadow-lg">
+    <header className="bg-foreground py-4 px-6 shadow-lg">
       <div className="container mx-auto flex justify-between items-center">
         <Link to="/dashboard" className="flex items-center gap-3">
           <img src={logo} alt="HemoApp" className="w-10 h-10 object-contain" />
-          <span className="text-2xl font-bold text-primary-foreground">
-            Hemo<span className="font-normal">App</span>
+          <span className="text-2xl font-bold text-accent">
+            Hemo<span className="font-normal text-primary-foreground">App</span>
           </span>
         </Link>
         <div className="flex items-center gap-4">
+          <Link to="/dashboard">
+            <Button className="bg-accent hover:bg-accent/90">Inicio</Button>
+          </Link>
           <Link to="/perfil">
             <Button
               variant="outline"
-              className="text-primary-foreground border-primary-foreground hover:bg-primary-foreground hover:text-primary"
+              className="text-primary border-primary-foreground hover:bg-primary-foreground hover:text-primary"
             >
               Mi Perfil
             </Button>
-          </Link>
-          <Link to="/dashboard">
-            <Button className="bg-accent hover:bg-accent/90">Inicio</Button>
           </Link>
         </div>
       </div>

@@ -23,7 +23,6 @@
 
 import { Link } from "react-router-dom";
 import Header from "@/components/Header";
-import logo from "@/assets/logo.png";
 import botonDonar from "@/assets/boton-donar.png";
 import botonMapa from "@/assets/boton-mapa.png";
 import botonEstado from "@/assets/boton-estado.png";
@@ -31,21 +30,21 @@ import PropTypes from "prop-types";
 
 export default function DashboardPage({ user, onLogout }) {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background"> 
       <Header user={user} onLogout={onLogout} />
 
-      <div className="container mx-auto py-12 px-6">
+     <div className="bg-gradient-to-b from-secondary  to-background  py-20 px-6 relative overflow-hidden min-h-[600px]">
+      <div className="container mx-auto py-12 px-6 relative z-10">
         {/* Logo y bienvenida */}
-        <div className="text-center mb-12">
-          <img
-            src={logo}
-            alt="HemoApp"
-            className="w-20 h-20 mx-auto mb-4 object-contain"
-          />
+        <div className="text-center mb-12 ">
+          <h1 className="text-3xl font-bold text-foreground mb-2 ">
+            ¡Hola, {user?.firstName || user?.userName || 'Donante'}!
+          </h1>
           <h1 className="text-4xl font-bold text-accent mb-2">
             ¿Qué quieres ver hoy?
           </h1>
         </div>
+     </div>
 
         {/* Action Cards */}
         <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
