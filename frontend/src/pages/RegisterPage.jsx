@@ -27,33 +27,33 @@ import {
 } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 
+
 export default function RegisterPage({ onRegister }) {
   // ⬅️ CAMBIO 1: Añadir estado de carga
-  const [isLoading, setIsLoading] = useState(false);
-
+  const [isLoading, setIsLoading] = useState(false); 
+  
   // ⬅️ ESTADO MÍNIMO REQUERIDO PARA EL REGISTRO INICIAL 💥
   const [formData, setFormData] = useState({
     // Nivel superior
-    userName: "",
+    userName: "", 
     email: "",
     password: "",
     // profileData fields (anidados)
     firstName: "",
     lastName: "",
-    dni: "",
-    birthDate: "",
+    dni: "", 
+    birthDate: "", 
     gender: "",
-    role: "",
+    role:"",
   });
-
+  
   const navigate = useNavigate();
   const { toast } = useToast();
 
   /**
    * handleSubmit - Procesa el registro del nuevo usuario
    */
-  const handleSubmit = async (e) => {
-    // ⬅️ CAMBIO 2: Función async
+  const handleSubmit = async (e) => { // ⬅️ CAMBIO 2: Función async
     e.preventDefault();
     setIsLoading(true);
 
@@ -62,20 +62,19 @@ export default function RegisterPage({ onRegister }) {
 
     // ⬅️ PAYLOAD ALINEADO AL BACKEND 💥
     const payload = {
-      userName: formData.userName,
-      email: formData.email,
-      password: formData.password,
-      role: formData.role, // "donador", "institucion", etc.
-
-      profileData: {
-        // OBJETO ANIDADO REQUERIDO
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        dni: formData.dni,
-        birthDate: formData.birthDate,
-        gender: formData.gender,
-      },
-      // Si el rol fuera 'institucion', aquí se añadiría 'institutionData'
+        userName: formData.userName,
+        email: formData.email,
+        password: formData.password,
+        role: formData.role, // "donador", "institucion", etc.
+        
+        profileData: { // OBJETO ANIDADO REQUERIDO
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            dni: formData.dni,
+            birthDate: formData.birthDate,
+            gender: formData.gender,
+        },
+        // Si el rol fuera 'institucion', aquí se añadiría 'institutionData'
     };
 
     // --- CONEXIÓN AL BACKEND (Implementación de fetch con try/catch/finally) ---
@@ -91,54 +90,40 @@ export default function RegisterPage({ onRegister }) {
       const data = await response.json();
 
       if (response.ok) {
-        const isInstitution = data.data.role === "institucion";
+        const isInstitution = data.data.role === 'institucion';
 
         toast({
-          title: "¡Registro exitoso!",
+          title: "¡Registro exitoso!", 
           description: isInstitution
-            ? "Institución en validación. Te notificaremos al ser aprobada."
-            : "Hemos enviado un link de verificación a tu email.",
+          ? "Institución en validación. Te notificaremos al ser aprobada."
+          : "Hemos enviado un link de verificación a tu email."
         });
-
+        
         // Redirigir a login para que el usuario complete el flujo de verificación/espera
         navigate("/login");
+        
       } else {
-        if (data.errors && Array.isArray(data.errors)) {
-          const errorList = (
-            <ul className="list-disc list-inside text-sm">
-              {data.errors.map((error, index) => (
-                <li key={index}>{error.msg}</li>
-              ))}
-            </ul>
-          );
-          toast({
-            title: data.msg,
-            description: errorList,
-            variant: "destructive",
-            duration: 5000,
-          });
-        } else {
-          const errorMsg = data.msg || "Error desconocido al registrar";
+        // El backend maneja validaciones y errores (ej. email ya existe)
+        const errorMessage = data.msg || "Error desconocido al registrar.";
 
-          toast({
-            title: "Error",
-            description: errorMsg,
-            variant: "destructive",
-            duration: 5000,
-          });
-        }
+        toast({
+          title: "Error",
+          description: errorMessage, 
+          variant: "destructive", 
+        });
       }
     } catch (error) {
-      console.error("Error de conexión:", error);
-      toast({
-        title: "Error de red",
-        description: "No se pudo conectar con el servidor.",
-        variant: "destructive",
-      });
+        console.error("Error de conexión:", error);
+        toast({
+            title: "Error de red",
+            description: "No se pudo conectar con el servidor.",
+            variant: "destructive",
+        });
     } finally {
       setIsLoading(false);
     }
   };
+
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-card-foreground to-primary flex items-center justify-center p-6 relative overflow-hidden">
@@ -153,24 +138,21 @@ export default function RegisterPage({ onRegister }) {
           <CardTitle className="text-3xl font-bold text-primary">
             Crear Cuenta
           </CardTitle>
-          <CardDescription className="text-lg font-semibold">
-            Únete a la comunidad de donantes
-          </CardDescription>
+          <CardDescription className="text-lg font-semibold">Únete a la comunidad de donantes</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
+            
             {/* ⬅️ CAMPO REQUERIDO: USERNAME 💥 */}
             <div className="space-y-2">
-              <Label htmlFor="userName">Nombre de Usuario</Label>
-              <Input
-                id="userName"
-                type="text"
-                required
-                value={formData.userName}
-                onChange={(e) =>
-                  setFormData({ ...formData, userName: e.target.value })
-                }
-              />
+                <Label htmlFor="userName">Nombre de Usuario</Label>
+                <Input
+                    id="userName"
+                    type="text"
+                    required
+                    value={formData.userName}
+                    onChange={(e) => setFormData({ ...formData, userName: e.target.value })}
+                />
             </div>
 
             {/* NOMBRE y APELLIDO */}
@@ -203,108 +185,98 @@ export default function RegisterPage({ onRegister }) {
 
             {/* DNI y FECHA DE NACIMIENTO (Requeridos) 💥 */}
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="dni">DNI</Label>
-                <Input
-                  id="dni"
-                  type="text"
-                  required
-                  value={formData.dni}
-                  onChange={(e) =>
-                    setFormData({ ...formData, dni: e.target.value })
-                  }
-                  minLength={7}
-                  maxLength={8}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="birthDate">Fecha de Nacimiento</Label>
-                <Input
-                  id="birthDate"
-                  type="date"
-                  required
-                  value={formData.birthDate}
-                  onChange={(e) =>
-                    setFormData({ ...formData, birthDate: e.target.value })
-                  }
-                />
-              </div>
+                <div className="space-y-2">
+                    <Label htmlFor="dni">DNI</Label>
+                    <Input
+                        id="dni"
+                        type="text"
+                        required
+                        value={formData.dni}
+                        onChange={(e) => setFormData({ ...formData, dni: e.target.value })}
+                        minLength={7}
+                        maxLength={8}
+                    />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="birthDate">Fecha de Nacimiento</Label>
+                    <Input
+                        id="birthDate"
+                        type="date"
+                        required
+                        value={formData.birthDate}
+                        onChange={(e) => setFormData({ ...formData, birthDate: e.target.value })}
+                    />
+                </div>
             </div>
 
             {/* EMAIL y CONTRASEÑA */}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  required
-                  value={formData.email}
-                  onChange={(e) =>
-                    setFormData({ ...formData, email: e.target.value })
-                  }
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                required
+                value={formData.email}
+                onChange={(e) =>
+                  setFormData({ ...formData, email: e.target.value })
+                }
                 />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="password">Contraseña</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  required
-                  minLength={6}
-                  value={formData.password}
-                  onChange={(e) =>
-                    setFormData({ ...formData, password: e.target.value })
-                  }
-                />
-              </div>
             </div>
-
+            <div className="space-y-2">
+              <Label htmlFor="password">Contraseña</Label>
+              <Input
+                id="password"
+                type="password"
+                required
+                minLength={6} 
+                value={formData.password}
+                onChange={(e) =>
+                  setFormData({ ...formData, password: e.target.value })
+                }
+                />
+                </div>
+            </div>
+            
             {/* GÉNERO (RENOMBRADO de 'status') 💥 */}
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
+            <div className="space-y-2">
                 <Label htmlFor="gender">Género</Label>
                 <Select
-                  value={formData.gender}
-                  onValueChange={(value) =>
-                    setFormData({ ...formData, gender: value })
-                  }
+                    value={formData.gender}
+                    onValueChange={(value) => setFormData({ ...formData, gender: value })}
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecciona tu género" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="male">Masculino</SelectItem>
-                    <SelectItem value="female">Femenino</SelectItem>
-                    <SelectItem value="other">Otro</SelectItem>
-                  </SelectContent>
+                    <SelectTrigger>
+                        <SelectValue placeholder="Selecciona tu género" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="male">Masculino</SelectItem>
+                        <SelectItem value="female">Femenino</SelectItem>
+                        <SelectItem value="other">Otro</SelectItem>
+                    </SelectContent>
                 </Select>
-              </div>
-
-              <div className="space-y-2">
+            </div>
+            
+            <div className="space-y-2">
                 <Label htmlFor="role">Tipo de Usuario</Label>
                 <Select
-                  value={formData.role}
-                  onValueChange={(value) =>
-                    setFormData({ ...formData, role: value })
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecciona tu rol" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {/* Valores alineados a tu esquema del backend (user.model.js) */}
-                    <SelectItem value="donador">Donante</SelectItem>
-                    <SelectItem value="community_member">
-                      Comunidad (No donante)
-                    </SelectItem>
-                    <SelectItem value="institucion">Institución</SelectItem>
-                    <SelectItem value="moderador">Moderador</SelectItem>
-                  </SelectContent>
+                    value={formData.role}
+                    onValueChange={(value) => setFormData({ ...formData, role: value })}
+                    >
+                    <SelectTrigger>
+                        <SelectValue placeholder="Selecciona tu rol" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {/* Valores alineados a tu esquema del backend (user.model.js) */}
+                        <SelectItem value="donador">Donante</SelectItem>
+                        <SelectItem value="community_member">Comunidad (No donante)</SelectItem>
+                        <SelectItem value="institucion">Institución</SelectItem>
+                        <SelectItem value="moderador">Moderador</SelectItem>
+                    </SelectContent>
                 </Select>
-              </div>
             </div>
-
+            </div>
+            
             <Button
               type="submit"
               className="w-full bg-accent hover:bg-accent/90"
@@ -317,7 +289,7 @@ export default function RegisterPage({ onRegister }) {
                   Registrando...
                 </>
               ) : (
-                "Crear Cuenta"
+              "Crear Cuenta"
               )}
             </Button>
             <div className="text-center pt-4 border-t">

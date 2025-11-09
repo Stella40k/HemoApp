@@ -122,7 +122,7 @@ export default function App() {
         <Route
           path="/login"
           element={
-            !isAuthenticated ? (
+            isAuthenticated ? (
               <Navigate to="/dashboard" replace />
             ) : (
               <LoginPage onLogin={handleLogin} />
