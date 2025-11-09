@@ -2,6 +2,7 @@ import { userModel } from "../models/user.model.js";
 import { generateToken, verifyToken } from "../helpers/jwt.helper.js";
 import { comparePasswords } from "../helpers/bcrypt.helper.js";
 import { RegistrationService } from "../services/registration.service.js";
+import { envs } from "../config/config.env.js";
 
 //MODIFICAR LA VERIFICACION DE LA CUENTA!!!
 
@@ -185,38 +186,34 @@ export const logout = async (req, res) => {
 // };
 export const verifyEmail = async (req, res) => {
   try {
+    // El token llega por params porque el enlace apunta al BACKEND.
+    // Verificamos y luego redirigimos al FRONTEND sin exponer el token en la URL.
     const { token } = req.params;
     const user = await userModel.findOne({
       emailVerificationToken: token,
       emailVerificationExpires: { $gt: Date.now() },
     });
     if (!user) {
-      return res.status(400).json({
-        ok: false,
-        msg: "Token de verificacion invalido o expirado",
-      });
+      // Redirigir al frontend a una página de fallo de verificación
+      const failUrl = `${envs.FRONTEND_URL}/verify-failed`;
+      return res.redirect(failUrl);
     }
-    //PARA ACTIVAR LA CUENTA (NO DISPONIBILIDAD DE DONACION)
+
+    // ACTIVAR LA CUENTA (NO DISPONIBILIDAD DE DONACION)
     user.accountStatus = "verified";
     user.emailVerified = true;
     user.emailVerificationToken = undefined;
     user.emailVerificationExpires = undefined;
 
     await user.save();
-    return res.status(200).json({
-      ok: true,
-      msg: "Email verificado con exitos, ya puede iniicar sesion y donar",
-      data: {
-        id: user._id,
-        userName: user.userName,
-        accountStatus: user.accountStatus,
-      },
-    });
+
+    // Redirigimos al frontend a una ruta de confirmación limpia (sin token)
+    const successUrl = `${envs.FRONTEND_URL}/email-verified`;
+    return res.redirect(successUrl);
   } catch (error) {
     console.log("error en la verificacion del mail", error);
-    return res.status(500).json({
-      ok: false,
-      msg: "Error interno del servir, fallo la verificacion del mail",
-    });
+    // En caso de error redirigimos a la página de fallo del frontend
+    const failUrl = `${envs.FRONTEND_URL}/verify-failed`;
+    return res.redirect(failUrl);
   }
 };

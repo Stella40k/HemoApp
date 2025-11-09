@@ -14,7 +14,8 @@ class EmailService {
         });
     }
     async sendVerificationEmail(to, token){ //es el metodo de envio, tiene la logica de node
-        const verificationUrl = `${envs.FRONTEND_URL}/verify-email?token=${token}`;
+        // Enviar al endpoint del BACKEND que procesará el token y redirigirá al frontend
+        const verificationUrl = `${envs.BACKEND_URL}/auth/verify-email/${token}`;
         const mailOptions ={
             from: `HemoApp <${envs.EMAIL_USER}>`,
             to: to,
