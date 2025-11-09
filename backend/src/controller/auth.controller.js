@@ -1,9 +1,5 @@
 import { userModel } from "../models/user.model.js";
-import {
-  generateToken,
-  verifyToken,
-  generateTokenRefresh,
-} from "../helpers/jwt.helper.js";
+import { generateToken, verifyToken } from "../helpers/jwt.helper.js";
 import { comparePasswords } from "../helpers/bcrypt.helper.js";
 import { RegistrationService } from "../services/registration.service.js";
 
@@ -93,11 +89,10 @@ export const login = async (req, res) => {
       });
     }
     const accessToken = generateToken(user);
-    const refreshToken = generateTokenRefresh(user);
     //parte para la auditoria
     user.lastLogin = new Date();
     user.loginCount += 1;
-    user.refreshToken = refreshToken;
+    user.Token = accessToken;
     await user.save();
 
     return res.status(200).json({
@@ -105,7 +100,6 @@ export const login = async (req, res) => {
       msg: "Logueado correctamente, bienvenido!",
       data: {
         accessToken,
-        refreshToken,
         user: {
           id: user._id,
           email: user.email,
@@ -117,7 +111,7 @@ export const login = async (req, res) => {
       },
     });
   } catch (error) {
-    //console.log(error);
+    console.log(error);
     res.status(500).json({
       ok: false,
       msg: "Error interno en el servidor",
@@ -129,7 +123,7 @@ export const getMyProfile = async (req, res) => {
     const userId = req.user._id; //viene la info del token
     const myProfile = await userModel
       .findById(userId)
-      .select("-password -refreshToken");
+      .select("-password -Token");
     res.status(200).json({
       ok: true,
       data: myProfile,
@@ -147,7 +141,7 @@ export const logout = async (req, res) => {
   try {
     const userId = req.user._id;
     await userModel.findByIdAndUpdate(userId, {
-      refreshToken: null,
+      Token: null,
       //$unset: {refreshToken: 1} elimina todo el campo, activar cuando deje de probar
     });
     return res.status(200).json({
@@ -163,32 +157,32 @@ export const logout = async (req, res) => {
     });
   }
 };
-export const refreshToken = async (req, res) => {
-  try {
-    const user = req.user;
-    const newAccesToken = generateToken(user);
-    const newRefreshToken = generateTokenRefresh(user);
+// export const refreshToken = async(req, res)=>{
+//     try {
+//         const user = req.user;
+//         const newAccesToken = generateToken(user);
+//         const newRefreshToken = generateTokenRefresh(user);
 
-    //actualizar el refhesh
-    user.refreshToken = newRefreshToken;
-    await user.save();
+//         //actualizar el refhesh
+//         user.refreshToken = newRefreshToken;
+//         await user.save()
 
-    return res.status(200).json({
-      ok: true,
-      msg: "Token actualizado correctamente",
-      data: {
-        accessToken: newAccesToken,
-        refreshToken: newRefreshToken,
-      },
-    });
-  } catch (error) {
-    console.log("eeror al refrescar la token", error);
-    return res.status(500).json({
-      ok: false,
-      msg: "Error interno del servidor: fallo en refresh Token",
-    });
-  }
-};
+//         return res.status(200).json({
+//             ok:true,
+//             msg: "Token actualizado correctamente",
+//             data: {
+//                 accessToken: newAccesToken,
+//                 refreshToken: newRefreshToken
+//             }
+//         });
+//     } catch (error) {
+//         console.log("eeror al refrescar la token", error);
+//         return res.status(500).json({
+//             ok: false,
+//             msg: "Error interno del servidor: fallo en refresh Token"
+//         });
+//     }
+// };
 export const verifyEmail = async (req, res) => {
   try {
     const { token } = req.params;
