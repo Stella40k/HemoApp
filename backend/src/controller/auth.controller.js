@@ -146,19 +146,44 @@ export const getMyProfile = async (req, res) => {
 export const logout = async (req, res) => {
   try {
     const userId = req.user._id;
+
+    // Limpiar tokens en la base de datos
     await userModel.findByIdAndUpdate(userId, {
       Token: null,
-      //$unset: {refreshToken: 1} elimina todo el campo, activar cuando deje de probar
+      refreshToken: null,
+      lastLogout: new Date(),
     });
+
+    // Limpiar todas las cookies relacionadas con autenticación
+    res.cookie("accessToken", "", {
+      httpOnly: true,
+      secure: envs.NODE_ENV === "production",
+      sameSite: "strict",
+      expires: new Date(0), // Expira inmediatamente
+    });
+
+    // También limpiamos el refresh token si existe
+    res.cookie("refreshToken", "", {
+      httpOnly: true,
+      secure: envs.NODE_ENV === "production",
+      sameSite: "strict",
+      expires: new Date(0),
+    });
+
+    // Invalidar la sesión si estás usando sessions
+    if (req.session) {
+      req.session.destroy();
+    }
+
     return res.status(200).json({
       ok: true,
-      msg: "Sesion cerrada",
+      msg: "Sesión cerrada exitosamente",
     });
   } catch (error) {
     console.log("Error al cerrar la sesion", error);
     return res.status(500).json({
       ok: false,
-      msg: "Ups! Error al querer cerrar sesion",
+      msg: "Error al cerrar sesión",
       error: error.message,
     });
   }
@@ -198,6 +223,7 @@ export const verifyEmail = async (req, res) => {
       emailVerificationToken: token,
       emailVerificationExpires: { $gt: Date.now() },
     });
+    console.log("user", user);
     if (!user) {
       // Redirigir al frontend a una página de fallo de verificación
       const failUrl = `${envs.FRONTEND_URL}/verify-failed`;
@@ -214,6 +240,7 @@ export const verifyEmail = async (req, res) => {
 
     // Redirigimos al frontend a una ruta de confirmación limpia (sin token)
     const successUrl = `${envs.FRONTEND_URL}/email-verified`;
+    console.log("user1", successUrl);
     return res.redirect(successUrl);
   } catch (error) {
     console.log("error en la verificacion del mail", error);
