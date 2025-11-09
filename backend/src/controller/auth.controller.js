@@ -95,7 +95,12 @@ export const login = async (req, res) => {
     user.loginCount += 1;
     user.Token = accessToken;
     await user.save();
-
+    res.cookie("accessToken", accessToken, {
+      httpOnly: true,
+      secure: envs.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 3600000,
+    });
     return res.status(200).json({
       ok: true,
       msg: "Logueado correctamente, bienvenido!",
