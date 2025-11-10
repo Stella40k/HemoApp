@@ -1,37 +1,40 @@
-import nodemailer from 'nodemailer';
-import {envs} from '../config/config.env.js';
+import nodemailer from "nodemailer";
+import { envs } from "../config/config.env.js";
 
 class EmailService {
-    constructor(){ //aca hacemos la conexion con el servicio de mail
-        this.transporter = nodemailer.createTransport({
-            host: envs.EMAIL_HOST,
-            port: envs.EMAIL_PORT,
-            secure: false,
-            auth:{
-                user: envs.EMAIL_USER,
-                pass: envs.EMAIL_PASS
-            }
-        });
+  constructor() {
+    //aca hacemos la conexion con el servicio de mail
+    this.transporter = nodemailer.createTransport({
+      host: envs.EMAIL_HOST,
+      port: envs.EMAIL_PORT,
+      secure: false,
+      auth: {
+        user: envs.EMAIL_USER,
+        pass: envs.EMAIL_PASS,
+      },
+    });
+  }
+  async sendVerificationEmail(to, token) {
+    //es el metodo de envio, tiene la logica de node
+    // Enviar al endpoint del BACKEND que procesará el token y redirigirá al frontend
+    const verificationUrl = `${envs.BACKEND_URL}api/auth/verify-email/${token}`;
+    const mailOptions = {
+      from: `HemoApp <${envs.EMAIL_USER}>`,
+      to: to,
+      subject: "Verifica tu identidad! Valida si sos vos",
+      html: this.getVerificationTemplate(verificationUrl),
+    };
+    try {
+      await this.transporter.sendMail(mailOptions);
+      console.log(`Email enviado a: ${to}`);
+      return true;
+    } catch (error) {
+      console.log("No se pudo enviar el email de verificación", error);
     }
-    async sendVerificationEmail(to, token){ //es el metodo de envio, tiene la logica de node
-        // Enviar al endpoint del BACKEND que procesará el token y redirigirá al frontend
-        const verificationUrl = `${envs.BACKEND_URL}/auth/verify-email/${token}`;
-        const mailOptions ={
-            from: `HemoApp <${envs.EMAIL_USER}>`,
-            to: to,
-            subject: "Verifica tu identidad! Valida si sos vos",
-            html: this.getVerificationTemplate(verificationUrl)
-        }
-        try {
-            await this.transporter.sendMail(mailOptions);
-            console.log(`Email enviado a: ${to}` );
-            return true;
-        } catch (error) {
-            console.log("No se pudo enviar el email de verificación", error);
-        }
-    }
-    getVerificationTemplate(verificationUrl){ //el template es 
-        return `
+  }
+  getVerificationTemplate(verificationUrl) {
+    //el template es
+    return `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
                 <h1 style="color: #e74c3c;">¡Bienvenido a HemoApp!</h1>
                 <p>Estás a un paso de unirte a nuestra comunidad de donantes.</p>
@@ -43,7 +46,7 @@ class EmailService {
                 </a>
                 <p><em>Si no solicitaste este registro, puedes ignorar este mensaje.</em></p>
             </div>
-        `
-    }    
+        `;
+  }
 }
 export const emailService = new EmailService();
