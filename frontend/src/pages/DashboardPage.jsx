@@ -21,7 +21,7 @@ import PropTypes from "prop-types";
 import { educationData } from "../data/educationData"; 
 import { educationEstatico } from "../data/educationEstatico"; 
 import { useState } from "react";
-import gotaImage from "@/assets/imagengota.png"; // Imagen para la tarjeta interactiva
+import bolsasangre from "@/assets/bolsasangre.png"; // Imagen para la tarjeta interactiva
 
 
 // Función auxiliar para renderizar la tabla de compatibilidad (Mantenida)
@@ -147,20 +147,11 @@ export default function DashboardPage({ user, onLogout }) {
                 
                 {/* 2. TARJETA INTERACTIVA (Requisitos/Proceso) - Muestra TODA la info */}
                 <div className="container mx-auto px-6 max-w-5xl mb-16">
-                    <Card className={`
-                        w-full 
-                        bg-accent border-4 border-accent
-                        transition-all duration-300 relative overflow-visible z-10 
-                        before:content-[''] before:absolute before:inset-0 
-                        before:bg-background before:rounded-lg 
-                        before:translate-x-2 before:translate-y-2 
-                        before:z-[-1] 
-                    `}>
-                        <div className="md:flex">
+                        <div className="md:flex relative">
                             {/* Columna de Imagen/Ícono (1/3) */}
-                            <div className={`md:w-1/3 p-4 flex flex-col items-center justify-center rounded-l-lg ${staticRotatorData.colorClass?.replace('text-', 'bg-') || 'bg-primary/10'}`}>
+                            <div className={`md:w-1/3 p-4 flex flex-col items-center justify-center rounded-l-lg`}>
                                 <img 
-                                    src={gotaImage} 
+                                    src={bolsasangre} 
                                     alt={staticRotatorData.title} 
                                     className="w-full h-auto object-cover rounded-md shadow-lg"
                                 />
@@ -174,17 +165,16 @@ export default function DashboardPage({ user, onLogout }) {
                                         {/* 🚨 Botón de rotación: Solo la flecha */}
                                         <Button 
                                             onClick={toggleStaticCard} 
-                                            variant="ghost" 
-                                            size="sm" 
-                                            className="text-primary hover:bg-primary/10 p-1"
+                                            variant="ghost"
+                                            className="absolute right-4 top-1/2 -translate-y-1/2 text-primary hover:bg-primary/10 p-1"
                                             aria-label="Cambiar información estática"
                                             title={currentStaticCardId === 1 ? 'Ver Proceso' : 'Ver Requisitos'}
                                         >
-                                            <ArrowRight className="h-6 w-6" /> 
+                                            <ArrowRight className="h-10 w-10" /> 
                                         </Button>
                                     </CardTitle>
                                     {/* Subtítulo de la data estática */}
-                                    <p className="text-sm text-foreground/80 font-semibold">{staticRotatorData.details.subtitle}</p>
+                                    <p className="text-base text-foreground/80 font-semibold">{staticRotatorData.details.subtitle}</p>
                                 </CardHeader>
                                 <CardContent className="p-0 pt-3">
                                     {/* Muestra TODOS los puntos de la data estática como párrafos */}
@@ -253,7 +243,6 @@ export default function DashboardPage({ user, onLogout }) {
             </div> {/* Cierre del div principal de gradiente */}
 
 
-            {/* MODAL DE DESPLIEGUE (AlertDialog) - Mantenido para las tarjetas dinámicas */}
             <AlertDialog open={isModalOpen} onOpenChange={handleModalClose}>
                 <AlertDialogContent className="max-w-xl md:max-w-3xl">
                     {selectedCard && (
