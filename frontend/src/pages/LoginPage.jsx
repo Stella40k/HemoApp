@@ -17,7 +17,6 @@
 
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -47,29 +46,38 @@ export default function LoginPage({ onLogin }) {
    * - Valida las credenciales
    * - Muestra mensajes de éxito o error
    */
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Recupera todos los usuarios registrados del localStorage
-    const users = JSON.parse(localStorage.getItem("hemoapp_users") || "[]");
-    // Busca un usuario que coincida con el email y contraseña ingresados
-    const user = users.find(
-      (u) => u.email === email && u.password === password
-    );
-
-    if (user) {
-      onLogin(user);
-      toast({
-        title: "¡Bienvenido!",
-        description: "Has iniciado sesión correctamente",
+    try {
+      const response = await fetch("http://localhost:3001/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
       });
-      navigate("/dashboard");
-    } else {
-      toast({
-        title: "Error",
-        description: "Credenciales incorrectas",
-        variant: "destructive",
-      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(
+          errorData.message || `Login failed with status: ${response.status}`
+        );
+      }
+      const user = response.json();
+      console.log("HI", user);
+      if (user) {
+        onLogin(user);
+        toast({
+          title: "¡Bienvenido!",
+          description: "Has iniciado sesión correctamente",
+        });
+        navigate("/dashboard");
+      } else {
+        toast({
+          title: "Error",
+          description: "Credenciales incorrectas",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Error al logear,", error);
     }
   };
 
@@ -81,12 +89,18 @@ export default function LoginPage({ onLogin }) {
       <Card className="w-full max-w-md relative z-10">
         <CardHeader className="text-center">
           <div className="mx-auto mb-4 w-24 h-24 bg-background rounded-full flex items-center justify-center">
-            <img src={logo} alt="Marca  HemoApp" className="w-16 h-auto object-contain"/>
+            <img
+              src={logo}
+              alt="Marca  HemoApp"
+              className="w-16 h-auto object-contain"
+            />
           </div>
           <CardTitle className="text-3xl font-bold text-primary">
             Iniciar Sesión
           </CardTitle>
-          <CardDescription className="text-lg font-semibold" >Ingresa a tu cuenta de HemoApp</CardDescription>
+          <CardDescription className="text-lg font-semibold">
+            Ingresa a tu cuenta de HemoApp
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">

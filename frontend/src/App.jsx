@@ -1,19 +1,3 @@
-/**
- * App.jsx - Componente principal de la aplicación HemoApp
- *
- * ¿Qué hace?
- * - Define el punto de entrada principal de la aplicación
- * - Gestiona el estado de autenticación del usuario
- * - Define todas las rutas de la aplicación (públicas y protegidas)
- * - Persiste la sesión del usuario usando localStorage
- *
- * ¿Cómo funciona?
- * - Usa React Router para manejar la navegación entre páginas
- * - Implementa protección de rutas: redirige usuarios no autenticados a login
- * - Mantiene sincronizado el estado del usuario entre sesiones
- * - Proporciona funciones de login/logout a todos los componentes hijos
- */
-
 import { useState, useEffect } from "react";
 import {
   BrowserRouter as Router,
@@ -38,12 +22,6 @@ export default function App() {
   // Estado que almacena los datos del usuario actual
   const [user, setUser] = useState(null);
 
-  /**
-   * useEffect - Se ejecuta al montar el componente
-   * ¿Para qué sirve?
-   * - Restaura la sesión del usuario desde localStorage al recargar la página
-   * - Permite que el usuario permanezca autenticado entre recargas del navegador
-   */
   useEffect(() => {
     // Intenta recuperar los datos del usuario almacenados localmente
     const storedUser = localStorage.getItem("hemoapp_user");
@@ -54,66 +32,23 @@ export default function App() {
     }
   }, []);
 
-  /**
-   * handleLogin - Función para iniciar sesión
-   * ¿Qué hace?
-   * - Guarda los datos del usuario en el estado y localStorage
-   * - Marca al usuario como autenticado
-   * - Permite el acceso a rutas protegidas
-   */
   const handleLogin = (userData) => {
     setUser(userData);
     setIsAuthenticated(true);
     localStorage.setItem("hemoapp_user", JSON.stringify(userData));
   };
 
-  /**
-   * handleLogout - Función para cerrar sesión
-   * ¿Qué hace?
-   * - Limpia los datos del usuario del estado
-   * - Marca al usuario como no autenticado
-   * - Elimina los datos del usuario de localStorage
-   * - Redirige al usuario a la página de inicio
-   */
   const handleLogout = () => {
     setUser(null);
     setIsAuthenticated(false);
     localStorage.removeItem("hemoapp_user");
   };
 
-  /**
-   * handleUpdateUser - Función para actualizar datos del usuario
-   * ¿Para qué sirve?
-   * - Actualiza los datos del usuario en el estado de React
-   * - Sincroniza los cambios con localStorage
-   * - Permite que los cambios del perfil persistan entre sesiones
-   */
   const handleUpdateUser = (updatedUserData) => {
     setUser(updatedUserData);
     localStorage.setItem("hemoapp_user", JSON.stringify(updatedUserData));
   };
 
-  /**
-   * Configuración de Rutas de la Aplicación
-   *
-   * Rutas Públicas (accesibles sin autenticación):
-   * - / : Página de inicio (landing page)
-   * - /login : Inicio de sesión
-   * - /register : Registro de nuevos usuarios
-   * - /solicitar-sangre : Formulario público para solicitar sangre
-   *
-   * Rutas Protegidas (requieren autenticación):
-   * - /dashboard : Panel principal del donante
-   * - /solicitudes : Ver solicitudes activas de sangre
-   * - /mapa : Mapa de centros de donación
-   * - /perfil : Perfil y configuración del usuario
-   * - /estado-donador : Estado y estadísticas de donaciones
-   *
-   * ¿Cómo funciona la protección?
-   * - Si el usuario está autenticado: muestra la página
-   * - Si no está autenticado: redirige a /login
-   * - Si está autenticado e intenta acceder a login/register: redirige a /dashboard
-   */
   return (
     <Router>
       <Routes>
@@ -132,7 +67,7 @@ export default function App() {
         <Route
           path="/register"
           element={
-            isAuthenticated ? (
+            !isAuthenticated ? (
               <Navigate to="/dashboard" replace />
             ) : (
               <RegisterPage onRegister={handleLogin} />
@@ -146,7 +81,7 @@ export default function App() {
         <Route
           path="/dashboard"
           element={
-            isAuthenticated ? (
+            !isAuthenticated ? (
               <DashboardPage
                 user={user}
                 onLogout={handleLogout}

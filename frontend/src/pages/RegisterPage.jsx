@@ -207,7 +207,7 @@ export default function RegisterPage({ onRegister }) {
                 <Label htmlFor="dni">DNI</Label>
                 <Input
                   id="dni"
-                  type="text"
+                  type="number"
                   required
                   value={formData.dni}
                   onChange={(e) =>
