@@ -75,7 +75,7 @@ export const login = async (req, res) => {
         msg: "credenciales incorrectas",
       });
     }
-    if (user.role === "institution") {
+    if (user.role === "institucion") {
       if (user.accountStatus === "pending_validation") {
         return res.status(401).json({
           ok: false,
