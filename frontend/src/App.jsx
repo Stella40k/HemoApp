@@ -57,7 +57,7 @@ export default function App() {
         <Route
           path="/login"
           element={
-            !isAuthenticated ? (
+            isAuthenticated ? (
               <Navigate to="/dashboard" replace />
             ) : (
               <LoginPage onLogin={handleLogin} />
@@ -67,7 +67,7 @@ export default function App() {
         <Route
           path="/register"
           element={
-            !isAuthenticated ? (
+            isAuthenticated ? (
               <Navigate to="/dashboard" replace />
             ) : (
               <RegisterPage onRegister={handleLogin} />
@@ -95,7 +95,7 @@ export default function App() {
         <Route
           path="/solicitudes"
           element={
-            isAuthenticated ? (
+            !isAuthenticated ? (
               <BloodRequestsPage user={user} onLogout={handleLogout} />
             ) : (
               <Navigate to="/login" replace />
@@ -105,7 +105,7 @@ export default function App() {
         <Route
           path="/mapa"
           element={
-            isAuthenticated ? (
+            !isAuthenticated ? (
               <MapPage user={user} onLogout={handleLogout} />
             ) : (
               <Navigate to="/login" replace />
@@ -115,7 +115,7 @@ export default function App() {
         <Route
           path="/perfil"
           element={
-            isAuthenticated ? (
+            !isAuthenticated ? (
               <ProfilePage
                 user={user}
                 onLogout={handleLogout}
@@ -129,7 +129,7 @@ export default function App() {
         <Route
           path="/estado-donador"
           element={
-            isAuthenticated ? (
+            !isAuthenticated ? (
               <DonorStatusPage
                 user={user}
                 onLogout={handleLogout}

@@ -90,7 +90,14 @@ export default function DashboardPage({ user, onLogout }) {
             </div>
           </Link>
         </div>
+
       </div>
+      <div className="space-y-6 mb-8">
+            <h2 className="text-3xl font-bold text-foreground">
+              Instituciones Destacadas
+            </h2>
+            <InstitutionsCarousel />
+          </div>
     </div>
   );
 }
