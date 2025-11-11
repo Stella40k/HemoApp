@@ -235,10 +235,24 @@ export const verifyEmail = async (req, res) => {
     user.emailVerificationToken = undefined;
     user.emailVerificationExpires = undefined;
 
+    //generacion de tokens para un login automatico despues de validar email
+    const accessToken = generateToken(user);
+    const refreshToken = generateTokenRefresh(user);
+    user.Token = accessToken;
+    user.refreshToken = refreshToken;
+
     await user.save();
 
+    //establecer cookies seguras para el autologin
+    res.cookie("accessToken", accessToken, {
+      httpOnly: true,
+      secure: envs.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 3600000, // 1 hora
+    });
+
     // Redirigimos al frontend a una ruta de confirmación limpia (sin token)
-    const successUrl = `${envs.FRONTEND_URL}/email-verified`;
+    const successUrl = `${envs.FRONTEND_URL}/dashboard`;
     console.log("user1", successUrl);
     return res.redirect(successUrl);
   } catch (error) {
