@@ -37,7 +37,11 @@ export default function EmailSentPage() {
               Revisa tu carpeta de spam o correo no deseado.
             </p>
           </div>
-          <Link to="/"></Link>
+          <Link to="/dasboard">
+            <Button className="w-full bg-[#e74c3c] hover:bg-red-700 text-lg">
+              Ir al home
+            </Button>
+          </Link>
         </CardContent>
       </Card>
     </div>
