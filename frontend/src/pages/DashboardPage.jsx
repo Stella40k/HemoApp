@@ -1,10 +1,3 @@
-/**
- * DashboardPage.jsx - Panel principal del donante autenticado (ESTRUCTURA FINAL CON ROTACIÓN ESTÁTICA)
- *
- * NOTA: La tarjeta principal alterna entre Requisitos (ID 1) y Proceso (ID 5)
- * de educationEstatico.js, mostrando la lista COMPLETA de puntos directamente.
- */
-
 import { Link } from "react-router-dom";
 import Header from "@/components/Header";
 // Importaciones de componentes de UI
@@ -12,7 +5,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 // Importaciones de iconos y assets
-import { ArrowRight, RotateCw } from "lucide-react"; 
+import { ArrowRight, RotateCw, ArrowLeft} from "lucide-react"; 
 import botonDonar from "@/assets/boton-donar.png";
 import botonMapa from "@/assets/boton-mapa.png";
 import botonEstado from "@/assets/boton-estado.png";
@@ -21,42 +14,16 @@ import PropTypes from "prop-types";
 import { educationData } from "../data/educationData"; 
 import { educationEstatico } from "../data/educationEstatico"; 
 import { useState } from "react";
-import bolsasangre from "@/assets/bolsasangre.png"; // Imagen para la tarjeta interactiva
-
-
-// Función auxiliar para renderizar la tabla de compatibilidad (Mantenida)
-const renderCompatibilityTable = (tableData) => (
-    <div className="overflow-x-auto text-sm">
-        <table className="min-w-full divide-y divide-gray-200 border-collapse">
-            <thead>
-                <tr className="text-left text-xs font-medium text-primary uppercase tracking-wider bg-primary/10">
-                    <th className="py-3 px-6">Grupo Sanguíneo</th>
-                    <th className="py-3 px-6">Puede donar a:</th>
-                    <th className="py-3 px-6">Puede recibir de:</th>
-                </tr>
-            </thead>
-            <tbody className="bg-card divide-y divide-gray-200">
-                {tableData.map((row, index) => (
-                    <tr key={index} className={row.group.includes('-') ? 'bg-secondary/10' : ''}>
-                        <td className="py-4 px-6 whitespace-nowrap font-semibold text-foreground">{row.group}</td>
-                        <td className="py-4 px-6 whitespace-nowrap text-foreground">{row.donate}</td>
-                        <td className="py-4 px-6 whitespace-nowrap text-foreground">{row.receive}</td>
-                    </tr>
-                ))}
-            </tbody>
-        </table>
-    </div>
-);
-
+import gotaImage from "@/assets/imagengota.png"; 
+import bolsasangreImage from "@/assets/bolsasangre.png"; 
 
 export default function DashboardPage({ user, onLogout }) {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedCard, setSelectedCard] = useState(null); 
+    const [selectedCardIndex, setSelectedCardIndex] = useState(-1);
 
-    // 1. ESTADO PARA CONTROLAR LA ROTACIÓN DE LA TARJETA PRINCIPAL
     const [currentStaticCardId, setCurrentStaticCardId] = useState(1); 
 
-    // 2. LÓGICA DE DATOS ESTÁTICOS Y DINÁMICOS
     const staticInfoData = {
         requisitos: Array.isArray(educationEstatico) ? educationEstatico.find(d => d.id === 1) : null,
         proceso: Array.isArray(educationEstatico) ? educationEstatico.find(d => d.id === 5) : null,
@@ -66,7 +33,29 @@ export default function DashboardPage({ user, onLogout }) {
         ? educationData.filter(d => d.id !== 1 && d.id !== 5)
         : [];
     
-    // 3. OBTENER LA DATA ACTUAL Y FUNCIÓN DE ROTACIÓN
+    const allEducationCards = [
+        staticInfoData.requisitos,
+        staticInfoData.proceso,
+        ...dynamicCards
+    ].filter(Boolean)
+     .sort((a, b) => a.id - b.id);
+
+    // FUNCIÓN DE NAVEGACIÓN
+    const goToNextCard = () => {
+        if (allEducationCards.length <= 1) return;
+        const nextIndex = (selectedCardIndex + 1) % allEducationCards.length;
+        setSelectedCard(allEducationCards[nextIndex]);
+        setSelectedCardIndex(nextIndex);
+    };
+
+    // FUNCIÓN DE NAVEGACIÓN
+    const goToPrevCard = () => {
+        if (allEducationCards.length <= 1) return;
+        const prevIndex = (selectedCardIndex - 1 + allEducationCards.length) % allEducationCards.length;
+        setSelectedCard(allEducationCards[prevIndex]);
+        setSelectedCardIndex(prevIndex);
+    };
+
     const staticRotatorData = currentStaticCardId === 1 
         ? staticInfoData.requisitos 
         : staticInfoData.proceso;
@@ -77,15 +66,47 @@ export default function DashboardPage({ user, onLogout }) {
 
     const handleCardClick = (cardData) => {
         setSelectedCard(cardData);
+        const index = allEducationCards.findIndex(card => card.id === cardData.id);
+        setSelectedCardIndex(index);
         setIsModalOpen(true);
     };
 
     const handleModalClose = () => {
         setIsModalOpen(false);
         setSelectedCard(null);
+        setSelectedCardIndex(-1);
     };
 
-    // Guardrail para datos esenciales
+
+    const renderCompatibilityTable = (tableData) => {
+        if (!tableData || tableData.length === 0) return null;
+        return (
+            <div className="pt-6 space-y-4 border-t">
+                <h3 className="text-xl font-bold text-foreground pb-2">Tabla de Compatibilidad Sanguínea</h3>
+                <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y dividey-gray-200">
+                        <thead className="bg-secondary/50">
+                            <tr>
+                                <th className="px-4 py-2 text-left text-xs font-medium text-foreground/80 uppercase tracking-wider">Grupo</th>
+                                <th className="px-4 py-2 text-left text-xs font-medium text-foreground/80 uppercase tracking-wider">Donar a</th>
+                                <th className="px-4 py-2 text-left text-xs font-medium text-foreground/80 uppercase tracking-wider">Recibir de</th>
+                            </tr>
+                        </thead>
+                        <tbody className="bg-background divide-y divide-gray-200">
+                            {tableData.map((row, index) => (
+                                <tr key={index}>
+                                    <td className="px-4 py-3 whitespace-nowrap text-base font-bold text-accent">{row.group}</td>
+                                    <td className="px-4 py-3 whitespace-wrap text-base text-foreground/90">{row.donate}</td>
+                                    <td className="px-4 py-3 whitespace-wrap text-base text-foreground/90">{row.receive}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        );
+    };
+
     if (!staticRotatorData || !staticRotatorData.details) {
         return (
             <div className="min-h-screen bg-background flex items-center justify-center text-foreground">
@@ -94,10 +115,6 @@ export default function DashboardPage({ user, onLogout }) {
         );
     }
     
-    // ----------------------------------------------------
-    // INICIO DEL RENDERIZADO JSX
-    // ----------------------------------------------------
-
     return (
         <div className="min-h-screen bg-background"> 
             <Header user={user} onLogout={onLogout} />
@@ -115,7 +132,6 @@ export default function DashboardPage({ user, onLogout }) {
                     </div>
                 </div>
 
-                {/* 1. Action Cards (Donar, Mapa, Estado) */}
                 <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto mb-20">
                     <Link to="/solicitudes" className="group">
                         <div className="text-center transition-transform hover:scale-105">
@@ -145,46 +161,42 @@ export default function DashboardPage({ user, onLogout }) {
                     </Link>
                 </div>
                 
-                {/* 2. TARJETA INTERACTIVA (Requisitos/Proceso) - Muestra TODA la info */}
-                <div className="container mx-auto px-6 max-w-5xl mb-16">
+                <div className="container mx-auto px-6 mb-16">
+                    <h2 className="text-3xl font-bold text-foreground text-center mb-10">
+                        Ten esto en cuenta antes de ir a donar
+                    </h2>
+                    <Card className={`
+                        w-full 
+                        bg-accent border-4 border-accent
+                        transition-all duration-300 relative overflow-visible z-10 
+                        before:content-[''] before:absolute before:inset-0 
+                        before:bg-background before:rounded-lg 
+                        before:translate-x-2 before:translate-y-2 
+                        before:z-[-1] 
+                    `}>
                         <div className="md:flex relative">
-                            {/* Columna de Imagen/Ícono (1/3) */}
                             <div className={`md:w-1/3 p-4 flex flex-col items-center justify-center rounded-l-lg`}>
                                 <img 
-                                    src={bolsasangre} 
+                                    src={currentStaticCardId === 1 ? bolsasangreImage : gotaImage} 
                                     alt={staticRotatorData.title} 
                                     className="w-full h-auto object-cover rounded-md shadow-lg"
                                 />
                             </div>
 
-                            {/* Columna de Contenido (2/3) */}
                             <div className="md:w-2/3 p-4">
                                 <CardHeader className="p-0 pb-2">
                                     <CardTitle className="text-2xl font-extrabold text-foreground flex justify-between items-center">
                                         {staticRotatorData.title}
-                                        {/* 🚨 Botón de rotación: Solo la flecha */}
-                                        <Button 
-                                            onClick={toggleStaticCard} 
-                                            variant="ghost"
-                                            className="absolute right-4 top-1/2 -translate-y-1/2 text-primary hover:bg-primary/10 p-1"
-                                            aria-label="Cambiar información estática"
-                                            title={currentStaticCardId === 1 ? 'Ver Proceso' : 'Ver Requisitos'}
-                                        >
-                                            <ArrowRight className="h-10 w-10" /> 
-                                        </Button>
                                     </CardTitle>
-                                    {/* Subtítulo de la data estática */}
                                     <p className="text-base text-foreground/80 font-semibold">{staticRotatorData.details.subtitle}</p>
                                 </CardHeader>
                                 <CardContent className="p-0 pt-3">
-                                    {/* Muestra TODOS los puntos de la data estática como párrafos */}
                                     <div className="space-y-2 text-lg text-foreground font-semibold">
                                         {staticRotatorData.details.points?.map((point, index) => ( 
                                             <p key={index}>{point}</p>
                                         ))}
                                     </div>
                                     
-                                    {/* Muestra Exclusiones si existen (Opcional, basado en tu data) */}
                                     {staticRotatorData.details.exclusions && staticRotatorData.details.exclusions.length > 0 && (
                                         <div className="mt-4 pt-4 border-t border-gray-200">
                                             <p className="font-bold text-xl text-primary mb-1">Exclusiones:</p>
@@ -196,31 +208,38 @@ export default function DashboardPage({ user, onLogout }) {
 
                                 </CardContent>
                             </div>
+                            
+                            <Button 
+                                onClick={toggleStaticCard} 
+                                variant="ghost" 
+                                className="absolute right-4 top-1/2 -translate-y-1/2 text-primary hover:bg-primary/10 p-1"
+                                aria-label="Cambiar información estática"
+                            >
+                                <ArrowRight className="h-10 w-10" /> 
+                            </Button>
                         </div>
                     </Card>
                 </div>
                 
-                {/* 3. SECCIÓN EDUCATIVA DINÁMICA (Tarjetas que abren Modal) - Mantenida */}
                 <div className="container mx-auto px-6 mt-16 max-w-5xl">
-
                     <div className="grid md:grid-cols-3 gap-6"> 
                         {dynamicCards.map((card) => (
                             <div 
                                 key={card.id} 
                                 className="group cursor-pointer" 
-                                onClick={() => handleCardClick(card)} // Abre el modal
+                                onClick={() => handleCardClick(card)}
                             >
 
                                 <Card className="
                                     h-full p-4 
-                                    bg-foreground border-4 border-foreground /* Cara frontal: Foreground, Borde Background */
+                                    bg-foreground border-4 border-foreground 
                                     transition-all duration-300 hover:scale-[1.02] 
                                     relative overflow-visible z-10 
                                     before:content-[''] before:absolute before:inset-0 
                                     before:bg-background before:rounded-lg 
-                                    before:translate-x-2 before:translate-y-2 /* Desfase a la derecha y abajo */
+                                    before:translate-x-2 before:translate-y-2 
                                     before:transition-transform before:duration-300 
-                                    before:z-[-1] /* Detrás de la tarjeta principal */
+                                    before:z-[-1] 
                                     group-hover:before:translate-x-0 group-hover:before:translate-y-0
                                 ">
                                     <CardHeader className="p-0 pb-2">
@@ -240,11 +259,27 @@ export default function DashboardPage({ user, onLogout }) {
                     </div>
                 </div>
                 
-            </div> {/* Cierre del div principal de gradiente */}
+            </div> 
 
 
             <AlertDialog open={isModalOpen} onOpenChange={handleModalClose}>
-                <AlertDialogContent className="max-w-xl md:max-w-3xl">
+                {/* CLASES CORREGIDAS: Añadido z-50 para superposición. */}
+                <AlertDialogContent className="max-w-xl md:max-w-3xl rounded-lg ">
+                    
+                    {/* Botón de cerrar (X) */}
+                    <Button
+                        onClick={handleModalClose}
+                        variant="ghost"
+                        size="sm"
+                        className="absolute top-3 right-3 text-foreground/60 hover:text-foreground hover:bg-transparent z-30"
+                        aria-label="Cerrar modal"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </Button>
+               
+
                     {selectedCard && (
                         <>
                             <AlertDialogHeader>
@@ -252,29 +287,25 @@ export default function DashboardPage({ user, onLogout }) {
                                     <span className="mr-3 text-xl">{selectedCard.icon}</span> 
                                     {selectedCard.title}
                                 </AlertDialogTitle>
-                                {/* Subtítulo sin línea de borde */}
                                 <AlertDialogDescription className="text-lg text-foreground/80 pt-2">
-                                    {selectedCard.details.subtitle}
+                                    {selectedCard.details?.subtitle}
                                 </AlertDialogDescription>
                             </AlertDialogHeader>
 
-                            <div className="space-y-6 max-h-[70vh] overflow-y-auto pr-4">
+                            {/* CONTENEDOR DE SCROLL: Aseguramos max-w-full y overflow-x-auto */}
+                            <div className="space-y-6 max-h-[60vh] max-w-full border-t overflow-y-auto overflow-x-auto pr-4">
 
-                                {/* Lista Principal */}
-                                {selectedCard.details.points && (
-                                    <ul className="space-y-3 text-base text-foreground">
-                                        <h3 className="text-xl font-bold text-foreground pb-2">Información Relevante</h3> 
-                                        {selectedCard.details.points.map((point, index) => (
-                                            <li key={index} className="flex items-start">
-                                                <span className="mr-3 text-primary font-bold">●</span> 
-                                                {point}
-                                            </li>
-                                        ))}
-                                    </ul>
-                                )}
+                                <ul className="space-y-3 text-base text-foreground">
+                                    {selectedCard.details?.points?.length > 0 && <h3 className="text-xl font-bold text-foreground pb-2">Información Relevante</h3>}
+                                    {selectedCard.details?.points?.map((point, index) => (
+                                        <li key={index} className="flex items-start">
+                                            <span className="mr-3 text-primary font-bold">●</span> 
+                                            {point}
+                                        </li>
+                                    ))}
+                                </ul>
                                 
-                                {/* Exclusiones */}
-                                {selectedCard.details.exclusions && selectedCard.details.exclusions.length > 0 && (
+                                {selectedCard.details?.exclusions && selectedCard.details.exclusions.length > 0 && (
                                     <div className="pt-6 space-y-4 border-t">
                                         <h3 className="text-xl font-bold text-accent pb-2">Exclusiones / Restricciones</h3>
                                         <ul className="space-y-4 text-lg text-foreground">
@@ -287,9 +318,9 @@ export default function DashboardPage({ user, onLogout }) {
                                     </div>
                                 )}
 
-                                {selectedCard.details.table && renderCompatibilityTable(selectedCard.details.table)}
+                                {selectedCard.details?.table && renderCompatibilityTable(selectedCard.details.table)}
 
-                                {selectedCard.details.extra && (
+                                {selectedCard.details?.extra && (
                                     <div className="mt-8 p-4 bg-secondary/30 rounded-lg border-l-4 border-primary">
                                         <p className="font-semibold text-primary mb-1">Nota importante:</p>
                                         <p className="text-base text-foreground">{selectedCard.details.extra}</p>

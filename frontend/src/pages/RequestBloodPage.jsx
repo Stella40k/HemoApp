@@ -36,32 +36,36 @@ export default function RequestBloodPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-muted via-background to-muted">
+    <div className="min-h-screen bg-gradient-to-b from-muted via-background to-muted">
+      
       {/* Simple header */}
-      <nav className="bg-primary py-4 px-6 shadow-lg">
+      <nav className="bg-foreground py-4 px-6 shadow-lg">
         <div className="container mx-auto flex justify-between items-center">
           <Link to="/" className="flex items-center gap-3">
             <img src={logo} alt="HemoApp" className="w-10 h-10 object-contain" />
-            <span className="text-2xl font-bold text-primary-foreground">
-              Hemo<span className="font-normal">App</span>
+            <span className="text-2xl font-bold text-accent">
+              Hemo<span className="font-normal text-background">App</span>
             </span>
           </Link>
           <Link to="/">
-            <Button variant="outline" className="text-primary-foreground border-primary-foreground hover:bg-primary-foreground hover:text-primary">
+            <Button variant="outline" className="text-foreground border-primary-foreground hover:bg-primary-foreground font-semibold hover:text-primary">
               Volver al inicio
             </Button>
           </Link>
         </div>
       </nav>
 
-      <div className="container mx-auto py-12 px-6">
-        <Card className="max-w-2xl mx-auto">
+          <div className="min-h-screen bg-gradient-to-b from-card-foreground to-primary flex items-center justify-center p-6 relative overflow-hidden">
+      <div className="absolute left-0 w-[400px] h-[400px] bg-background/40 rounded-full blur-3xl"></div>
+      <div className="absolute left-0 top-2/4 w-[400px] h-[400px] bg-accent/40 rounded-full blur-3xl"></div>
+
+        <Card className="max-w-2xl mx-auto relative z-10">
           <CardHeader className="text-center">
-            <div className="mx-auto mb-4 w-16 h-16 bg-accent rounded-full flex items-center justify-center">
-              <Heart className="w-8 h-8 text-accent-foreground fill-accent-foreground" />
-            </div>
-            <CardTitle className="text-3xl font-bold text-primary">Solicitar Sangre</CardTitle>
-            <CardDescription>Completa los datos del paciente que necesita donación</CardDescription>
+            <div className="mx-auto mb-4 w-24 h-24 bg-background rounded-full flex items-center justify-center">
+            <img src={logo} alt="Marca  HemoApp" className="w-16 h-auto object-contain"/>
+          </div>
+            <CardTitle className="text-3xl font-bold text-accent">Solicitar Sangre</CardTitle>
+            <CardDescription className="font-semibold text-lg">Completa los datos del paciente que necesita donación</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
