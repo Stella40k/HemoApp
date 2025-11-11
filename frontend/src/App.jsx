@@ -1,231 +1,88 @@
-/**
- * App.jsx - Componente principal de la aplicación HemoApp
- *
- * ¿Qué hace?
- * - Define el punto de entrada principal de la aplicación
- * - Gestiona el estado de autenticación del usuario
- * - Define todas las rutas de la aplicación (públicas y protegidas)
- * - Persiste la sesión del usuario usando localStorage
- *
- * ¿Cómo funciona?
- * - Usa React Router para manejar la navegación entre páginas
- * - Implementa protección de rutas: redirige usuarios no autenticados a login
- * - Mantiene sincronizado el estado del usuario entre sesiones
- * - Proporciona funciones de login/logout a todos los componentes hijos
- */
-
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Navigate,
-} from "react-router-dom";
-import LandingPage from "./pages/LandingPage";
-import LoginPage from "./pages/LoginPage";
-import RegisterPage from "./pages/RegisterPage";
-import DashboardPage from "./pages/DashboardPage";
-import BloodRequestsPage from "./pages/BloodRequestsPage";
-import MapPage from "./pages/MapPage";
-import ProfilePage from "./pages/ProfilePage";
-import DonorStatusPage from "./pages/DonorStatusPage";
-import RequestBloodPage from "./pages/RequestBloodPage";
-import { Toaster } from "./components/ui/toaster";
-import OnboardingPage from "./pages/OnboardingPage"; // ⬅️ AÑADIDO: IMPORTACIÓN FALTANTE
 
-export default function App() {
-  // Estado para controlar si el usuario está autenticado
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  // Estado que almacena los datos del usuario actual
+import RegisterPage from "./pages/RegisterPage";
+import OnboardingPage from "./pages/OnboardingPage";
+import ProfilePage from "./pages/ProfilePage";
+import DashboardPage from "./pages/DashboardPage";
+
+function App() {
+  // Estado del usuario global (puede venir de localStorage)
   const [user, setUser] = useState(null);
 
-  /**
-   * useEffect - Se ejecuta al montar el componente
-   * ¿Para qué sirve?
-   * - Restaura la sesión del usuario desde localStorage al recargar la página
-   * - Permite que el usuario permanezca autenticado entre recargas del navegador
-   */
+  // Al cargar la app, chequea si hay usuario guardado
   useEffect(() => {
-    // Intenta recuperar los datos del usuario almacenados localmente
     const storedUser = localStorage.getItem("hemoapp_user");
     if (storedUser) {
-      const userData = JSON.parse(storedUser);
-      setUser(userData);
-      setIsAuthenticated(true);
+      setUser(JSON.parse(storedUser));
     }
   }, []);
 
-  /**
-   * handleLogin - Función para iniciar sesión
-   * ¿Qué hace?
-   * - Guarda los datos del usuario en el estado y localStorage
-   * - Marca al usuario como autenticado
-   * - Permite el acceso a rutas protegidas
-   */
-  const handleLogin = (userData) => {
-    setUser(userData);
-    setIsAuthenticated(true);
-    localStorage.setItem("hemoapp_user", JSON.stringify(userData));
-  };
-
-  /**
-   * handleLogout - Función para cerrar sesión
-   * ¿Qué hace?
-   * - Limpia los datos del usuario del estado
-   * - Marca al usuario como no autenticado
-   * - Elimina los datos del usuario de localStorage
-   * - Redirige al usuario a la página de inicio
-   */
+  // Cierre de sesión
   const handleLogout = () => {
-    setUser(null);
-    setIsAuthenticated(false);
     localStorage.removeItem("hemoapp_user");
+    setUser(null);
   };
 
-  /**
-   * handleUpdateUser - Función para actualizar datos del usuario
-   * ¿Para qué sirve?
-   * - Actualiza los datos del usuario en el estado de React
-   * - Sincroniza los cambios con localStorage
-   * - Permite que los cambios del perfil persistan entre sesiones
-   */
-  const handleUpdateUser = (updatedUserData) => {
-    setUser(updatedUserData);
-    localStorage.setItem("hemoapp_user", JSON.stringify(updatedUserData));
+  // Actualizar datos del usuario (desde ProfilePage)
+  const handleUpdateUser = (updatedUser) => {
+    setUser(updatedUser);
+    localStorage.setItem("hemoapp_user", JSON.stringify(updatedUser));
   };
 
-  /**
-   * Configuración de Rutas de la Aplicación
-   *
-   * Rutas Públicas (accesibles sin autenticación):
-   * - / : Página de inicio (landing page)
-   * - /login : Inicio de sesión
-   * - /register : Registro de nuevos usuarios
-   * - /solicitar-sangre : Formulario público para solicitar sangre
-   *
-   * Rutas Protegidas (requieren autenticación):
-   * - /dashboard : Panel principal del donante
-   * - /solicitudes : Ver solicitudes activas de sangre
-   * - /mapa : Mapa de centros de donación
-   * - /perfil : Perfil y configuración del usuario
-   * - /estado-donador : Estado y estadísticas de donaciones
-   *
-   * ¿Cómo funciona la protección?
-   * - Si el usuario está autenticado: muestra la página
-   * - Si no está autenticado: redirige a /login
-   * - Si está autenticado e intenta acceder a login/register: redirige a /dashboard
-   */
   return (
     <Router>
       <Routes>
-        {/* Rutas públicas: Accesibles por todos */}
-        <Route path="/" element={<LandingPage />} />
+        {/* Página de registro */}
         <Route
-          path="/login"
-          element={
-            isAuthenticated ? (
-              <Navigate to="/dashboard" replace />
-            ) : (
-              <LoginPage onLogin={handleLogin} />
-            )
-          }
+          path="/"
+          element={<RegisterPage onRegister={(newUser) => setUser(newUser)} />}
         />
-        <Route
-          path="/register"
-          element={
-            isAuthenticated ? (
-              <Navigate to="/dashboard" replace />
-            ) : (
-              <RegisterPage onRegister={handleLogin} />
-            )
-          }
-        />
-        {/* Ruta pública para solicitar sangre (puede ser usada por no logueados o familiares) */}
-        <Route path="/solicitar-sangre" element={<RequestBloodPage />} />
 
-        {/* Rutas protegidas: Solo para usuarios autenticados */}
+        {/* Onboarding: se muestra solo si hay usuario */}
         <Route
-          path="/dashboard"
+          path="/onboarding"
           element={
-            isAuthenticated ? (
-              <DashboardPage
-                user={user}
-                onLogout={handleLogout}
-                onUpdateUser={handleUpdateUser}
-              />
-            ) : (
-              <Navigate to="/login" replace />
-            )
+            user ? <OnboardingPage user={user} onUpdateUser={handleUpdateUser} /> : <Navigate to="/" />
           }
         />
-        <Route
-          path="/solicitudes"
-          element={
-            isAuthenticated ? (
-              <BloodRequestsPage user={user} onLogout={handleLogout} />
-            ) : (
-              <Navigate to="/login" replace />
-            )
-          }
-        />
-        <Route
-          path="/mapa"
-          element={
-            isAuthenticated ? (
-              <MapPage user={user} onLogout={handleLogout} />
-            ) : (
-              <Navigate to="/login" replace />
-            )
-          }
-        />
+
+        {/* Perfil: también solo si hay usuario */}
         <Route
           path="/perfil"
           element={
-            isAuthenticated ? (
+            user ? (
               <ProfilePage
                 user={user}
                 onLogout={handleLogout}
                 onUpdateUser={handleUpdateUser}
-              /> // Usar handleUpdateUser aquí
-            ) : (
-              <Navigate to="/login" replace />
-            )
-          }
-        />
-        <Route
-          path="/estado-donador"
-          element={
-            isAuthenticated ? (
-              <DonorStatusPage
-                user={user}
-                onLogout={handleLogout}
-                onUpdateUser={handleUpdateUser}
               />
             ) : (
-              <Navigate to="/login" replace />
+              <Navigate to="/" />
             )
           }
         />
-        
-        {/* ⬅️ RUTA PROTEGIDA PARA ONBOARDING */}
+
+        {/* Dashboard: también necesita usuario */}
         <Route
-          path="/onboarding"
+          path="/dashboard"
           element={
-            isAuthenticated ? (
-              <OnboardingPage
+            user ? (
+              <DashboardPage
                 user={user}
                 onLogout={handleLogout}
-                onUpdateUser={handleUpdateUser}
               />
             ) : (
-              <Navigate to="/login" replace />
+              <Navigate to="/" />
             )
           }
         />
-        
-        
+
+        {/* Redirección por defecto */}
+        <Route path="*" element={<Navigate to="/" />} />
       </Routes>
-      <Toaster />
     </Router>
   );
 }
+
+export default App;

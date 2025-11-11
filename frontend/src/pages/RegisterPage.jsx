@@ -103,7 +103,7 @@ export default function RegisterPage({ onRegister }) {
     });
     
     // ✅ REDIRECCIÓN FINAL AL DASHBOARD
-    navigate("/dashboard"); 
+    navigate("/onboarding"); 
   };
 
 
