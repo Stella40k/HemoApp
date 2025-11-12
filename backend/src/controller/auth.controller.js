@@ -252,7 +252,7 @@ export const verifyEmail = async (req, res) => {
     });
 
     // Redirigimos al frontend a una ruta de confirmación limpia (sin token)
-    const successUrl = `${envs.FRONTEND_URL}/dashboard`;
+    const successUrl = `${envs.FRONTEND_URL}/onboarding`;
     console.log("user1", successUrl);
     return res.redirect(successUrl);
   } catch (error) {
