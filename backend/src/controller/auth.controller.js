@@ -1,7 +1,12 @@
 import { userModel } from "../models/user.model.js";
-import { generateToken, verifyToken } from "../helpers/jwt.helper.js";
+import {
+  generateToken,
+  verifyToken,
+  generateTokenRefresh,
+} from "../helpers/jwt.helper.js";
 import { comparePasswords } from "../helpers/bcrypt.helper.js";
 import { RegistrationService } from "../services/registration.service.js";
+import { envs } from "../config/config.env.js";
 
 //MODIFICAR LA VERIFICACION DE LA CUENTA!!!
 
@@ -203,6 +208,35 @@ export const verifyEmail = async (req, res) => {
     user.emailVerificationExpires = undefined;
 
     await user.save();
+
+    // Si la petición viene de un navegador (acepta HTML), redirigimos al frontend
+    const successUrl = `${envs.FRONTEND_URL}/onboarding`;
+    const wantsHtml =
+      req.headers.accept && req.headers.accept.includes("text/html");
+
+    if (wantsHtml) {
+      // Generar refresh token y setearlo en cookie HttpOnly (opcional rotación)
+      try {
+        const refreshToken = generateTokenRefresh(user);
+        user.refreshToken = refreshToken;
+        await user.save();
+
+        const cookieOptions = {
+          httpOnly: true,
+          secure: envs.NODE_ENV === "production",
+          sameSite: "lax",
+          maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+        };
+        res.cookie("refreshToken", refreshToken, cookieOptions);
+      } catch (err) {
+        console.error("Error setting refresh token cookie:", err);
+        // continuamos con la redirección aunque falle el cookie set
+      }
+
+      return res.redirect(successUrl);
+    }
+
+    // Respuesta JSON por defecto para clientes API
     return res.status(200).json({
       ok: true,
       msg: "Email verificado con exitos, ya puede iniicar sesion y donar",
